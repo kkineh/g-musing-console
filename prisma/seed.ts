@@ -82,8 +82,8 @@ async function main() {
   // 되묻기를 거쳐 두 턴으로 끝난 대화
   await prisma.chat.create({
     data: {
-      type: "FORCE_DML",
-      title: "시책 처리보류 147건 삭제",
+      type: "LOGIC_REVIEW",
+      title: "성과수수료 미산출 사유",
       sessionId: "seed-session-b",
       memberId: "gist-v2",
       userId: jimin.id,
@@ -92,22 +92,23 @@ async function main() {
           {
             seq: 1,
             status: "DONE",
-            question: "시책 처리보류 상태인 147건을 삭제해주세요.",
+            question:
+              "특정 설계사의 성과수수료가 안 나옵니다. 실적은 등록되어 있는데 지급 내역에 안 보입니다.",
             answer:
-              "삭제 범위를 확인한 뒤 진행했습니다. 연결된 직접비 데이터까지 포함해 DML을 정리했습니다.",
+              "개인별 명세 기준으로 확인한 결과, 해당 설계사는 평가 기간 중 위촉 상태가 변경되어 성과 산출 대상에서 제외되었습니다. 실적 자체는 정상 등록되어 있습니다.",
             pendingQuestions: JSON.stringify([
               {
-                question: "삭제 범위를 어디까지 잡을까요?",
-                header: "삭제 범위",
+                question: "어느 화면에서 조회한 결과인가요?",
+                header: "조회 화면",
                 options: [
-                  { label: "해당 테이블만", description: "명시된 테이블만" },
-                  { label: "연결 테이블까지", description: "직접비 포함" },
+                  { label: "지사 소계", description: "지사 단위 합산" },
+                  { label: "개인별 명세", description: "설계사 단위 내역" },
                 ],
                 multiSelect: false,
               },
             ]),
             answeredInput: JSON.stringify({
-              "삭제 범위를 어디까지 잡을까요?": "연결 테이블까지",
+              "어느 화면에서 조회한 결과인가요?": "개인별 명세",
             }),
             elapsedMs: 94000,
             completedAt: new Date(),
@@ -126,8 +127,9 @@ async function main() {
           {
             seq: 2,
             status: "DONE",
-            question: "검증 SELECT도 같이 만들어주세요.",
-            answer: "삭제 전후를 대조할 수 있는 확인 쿼리를 추가했습니다.",
+            question: "그러면 위촉 상태가 언제 바뀐 건지도 알 수 있나요?",
+            answer:
+              "위촉 이력 테이블 기준으로 2026년 6월 18일에 변경되었습니다. 평가 기간이 6월 전체라 산출 시점에는 이미 제외 대상이었습니다.",
             elapsedMs: 41000,
             completedAt: new Date(),
           },
@@ -139,8 +141,8 @@ async function main() {
   // 되묻고 답을 기다리는 중인 대화
   await prisma.chat.create({
     data: {
-      type: "FORCE_DML",
-      title: "후보자리스트 정리",
+      type: "LOGIC_REVIEW",
+      title: "모집수수료율 산출 기준",
       sessionId: "seed-session-c",
       memberId: "gist-v1",
       userId: sangmin.id,
@@ -148,20 +150,21 @@ async function main() {
         create: {
           seq: 1,
           status: "WAITING_INPUT",
-          question: "후보자리스트에서 중복 등록된 건을 지워주세요.",
+          question: "모집수수료율이 예상과 다르게 나옵니다. 어떤 기준으로 정해지나요?",
           pendingQuestions: JSON.stringify([
             {
-              question: "대상 회원사를 알려주세요.",
-              header: "회원사",
+              question: "어느 채널의 수수료율을 보고 계신가요?",
+              header: "채널",
               options: [
-                { label: "GIST V1", description: "gist-v1" },
-                { label: "GIST V2", description: "gist-v2" },
+                { label: "직영", description: "본사 직영 조직" },
+                { label: "대리점", description: "위탁 대리점" },
               ],
               multiSelect: false,
             },
           ]),
           trace: JSON.stringify([
-            { label: "유형 판별", detail: "데이터 강제 반영", elapsedMs: 400 },
+            { label: "유형 판별", detail: "로직 확인", elapsedMs: 400 },
+            { label: "질문 분석", detail: "채널 구분 불명확", elapsedMs: 2600 },
           ]),
         },
       },

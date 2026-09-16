@@ -5,7 +5,7 @@
  * ENGINE_URL이 없으면 목업으로 동작해서 엔진 없이도 콘솔을 개발할 수 있다.
  */
 
-export type ChatType = "LOGIC_REVIEW" | "ERP_FIX" | "FORCE_DML";
+export type ChatType = "LOGIC_REVIEW";
 
 export type EngineRequest = {
   type: ChatType;
@@ -107,40 +107,36 @@ export async function runEngine(req: EngineRequest): Promise<EngineResponse> {
   }
 }
 
-/**
- * 엔진이 준비되기 전까지 쓰는 목업.
- * 되묻기 왕복을 실제로 재현해서 콘솔 쪽 흐름을 검증할 수 있게 한다 —
- * 데이터 강제 반영은 첫 턴에 삭제 범위를 되묻고, 답이 오면 완료한다.
- */
+/** 되묻기 왕복을 재현해서 엔진 없이도 콘솔 흐름을 검증할 수 있게 한다. */
 async function mockEngine(req: EngineRequest): Promise<EngineResponse> {
   await sleep(600);
 
   const sessionId = req.sessionId ?? `mock-${Date.now().toString(36)}`;
 
-  if (req.type === "FORCE_DML" && !req.answers) {
+  if (needsClarification(req)) {
     return {
       status: "waiting_input",
       sessionId,
       questions: [
         {
-          question: "삭제 범위를 어디까지 잡을까요?",
-          header: "삭제 범위",
+          question: "어느 기준으로 조회한 결과인지 알려주세요.",
+          header: "조회 기준",
           options: [
             {
-              label: "해당 테이블만",
-              description: "요청에 명시된 테이블만 삭제합니다",
+              label: "지사 소계",
+              description: "지사 단위로 합산한 화면 기준",
             },
             {
-              label: "연결 테이블까지",
-              description: "조인으로 연결된 데이터도 함께 삭제합니다",
+              label: "개인별 내역",
+              description: "설계사 개인 단위 명세 기준",
             },
           ],
           multiSelect: false,
         },
       ],
       trace: [
-        { label: "유형 판별", detail: "데이터 강제 반영", elapsedMs: 400 },
-        { label: "대상 테이블 확인", detail: "2개", elapsedMs: 3200 },
+        { label: "유형 판별", detail: "로직 확인", elapsedMs: 400 },
+        { label: "질문 분석", detail: "조회 기준 불명확", elapsedMs: 2800 },
       ],
     };
   }
@@ -157,7 +153,7 @@ async function mockEngine(req: EngineRequest): Promise<EngineResponse> {
       { locator: "TB_SU_JISA_RATE", description: "대상 지사 등록 행 없음" },
     ],
     trace: [
-      { label: "유형 판별", detail: labelOf(req.type), elapsedMs: 400 },
+      { label: "유형 판별", detail: "로직 확인", elapsedMs: 400 },
       { label: "지식베이스 라우팅", detail: "수수료 파이프라인", elapsedMs: 1100 },
       { label: "저장소 탐색", detail: "7개 파일", elapsedMs: 21700 },
       { label: "DB 조회", detail: "4건", elapsedMs: 31400 },
@@ -167,20 +163,21 @@ async function mockEngine(req: EngineRequest): Promise<EngineResponse> {
   };
 }
 
-function mockAnswer(req: EngineRequest): string {
-  if (req.answers) {
-    const picked = Object.values(req.answers).join(", ");
-    return `"${picked}" 기준으로 처리했습니다. 대상 147건을 확인했고 삭제 DML을 아래에 정리했습니다.\n\n(목업 응답입니다. ENGINE_URL을 설정하면 실제 엔진이 응답합니다.)`;
-  }
-  return `지급규정 개정이 원인입니다. 2026년 7월 31일 적용된 개정으로 산출 기준이 바뀌었고, 해당 건은 개정 후 기준값이 등록되어 있지 않아 0원으로 산출됩니다.\n\n(목업 응답입니다. ENGINE_URL을 설정하면 실제 엔진이 응답합니다.)`;
+/** 질문에 조회 기준이 안 적혀 있으면 되묻는다. 목업의 되묻기 발동 조건. */
+function needsClarification(req: EngineRequest): boolean {
+  if (req.answers) return false;
+  return !/소계|개인별|명세|기준/.test(req.question);
 }
 
-function labelOf(type: ChatType): string {
-  return type === "LOGIC_REVIEW"
-    ? "로직 확인"
-    : type === "ERP_FIX"
-      ? "ERP 단순 수정"
-      : "데이터 강제 반영";
+function mockAnswer(req: EngineRequest): string {
+  const note =
+    "\n\n(목업 응답입니다. ENGINE_URL을 설정하면 실제 엔진이 응답합니다.)";
+
+  if (req.answers) {
+    const picked = Object.values(req.answers).join(", ");
+    return `"${picked}" 기준으로 다시 확인했습니다. 해당 기준에서는 합산 대상이 달라지며, 산출 로직 자체는 정상 동작합니다.${note}`;
+  }
+  return `지급규정 개정이 원인입니다. 2026년 7월 31일 적용된 개정으로 산출 기준이 바뀌었고, 해당 건은 개정 후 기준값이 등록되어 있지 않아 0원으로 산출됩니다.${note}`;
 }
 
 function sleep(ms: number) {

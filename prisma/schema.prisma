@@ -132,8 +132,6 @@ model WikiDoc {
 
 enum ChatType {
   LOGIC_REVIEW
-  ERP_FIX
-  FORCE_DML
 }
 
 enum TurnStatus {
