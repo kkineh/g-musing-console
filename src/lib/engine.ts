@@ -1,0 +1,188 @@
+/**
+ * 엔진(엔진팀 영역) 호출부. 계약은 docs/engine-contract.md 참고.
+ *
+ * 이 파일 바깥에서는 엔진이 HTTP인지 큐인지, Agent SDK를 어떻게 부르는지 모른다.
+ * ENGINE_URL이 없으면 목업으로 동작해서 엔진 없이도 콘솔을 개발할 수 있다.
+ */
+
+export type ChatType = "LOGIC_REVIEW" | "ERP_FIX" | "FORCE_DML";
+
+export type EngineRequest = {
+  type: ChatType;
+  memberId: string;
+  question: string;
+  /** 이어가기일 때만. 첫 턴에는 없다. */
+  sessionId?: string;
+  /** 되묻기에 답할 때만. { 질문: 선택한 라벨 } */
+  answers?: Record<string, string>;
+};
+
+export type Reference = {
+  locator: string;
+  description: string;
+};
+
+export type TraceStep = {
+  label: string;
+  detail?: string;
+  elapsedMs: number;
+};
+
+export type PendingQuestion = {
+  question: string;
+  header: string;
+  options: { label: string; description: string }[];
+  multiSelect: boolean;
+};
+
+export type EngineUsage = {
+  elapsedMs: number;
+  tokens?: number;
+  filesRead?: number;
+  dbQueries?: number;
+};
+
+export type EngineResponse =
+  | {
+      status: "done";
+      sessionId: string;
+      answer: string;
+      references: Reference[];
+      trace: TraceStep[];
+      usage: EngineUsage;
+    }
+  | {
+      status: "waiting_input";
+      sessionId: string;
+      questions: PendingQuestion[];
+      trace: TraceStep[];
+    }
+  | {
+      status: "failed";
+      sessionId?: string;
+      error: string;
+    };
+
+export class EngineError extends Error {
+  constructor(
+    message: string,
+    readonly status?: number,
+  ) {
+    super(message);
+    this.name = "EngineError";
+  }
+}
+
+const TIMEOUT_MS = 5 * 60 * 1000;
+
+export async function runEngine(req: EngineRequest): Promise<EngineResponse> {
+  const base = process.env.ENGINE_URL;
+  if (!base) return mockEngine(req);
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+  try {
+    const res = await fetch(`${base}/process`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(req),
+      signal: controller.signal,
+    });
+
+    if (!res.ok) {
+      throw new EngineError(`엔진이 ${res.status}로 응답했습니다`, res.status);
+    }
+    return (await res.json()) as EngineResponse;
+  } catch (e) {
+    if (e instanceof EngineError) throw e;
+    if (e instanceof Error && e.name === "AbortError") {
+      throw new EngineError("엔진 응답이 5분을 넘었습니다");
+    }
+    throw new EngineError(
+      e instanceof Error ? e.message : "엔진 호출에 실패했습니다",
+    );
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * 엔진이 준비되기 전까지 쓰는 목업.
+ * 되묻기 왕복을 실제로 재현해서 콘솔 쪽 흐름을 검증할 수 있게 한다 —
+ * 데이터 강제 반영은 첫 턴에 삭제 범위를 되묻고, 답이 오면 완료한다.
+ */
+async function mockEngine(req: EngineRequest): Promise<EngineResponse> {
+  await sleep(600);
+
+  const sessionId = req.sessionId ?? `mock-${Date.now().toString(36)}`;
+
+  if (req.type === "FORCE_DML" && !req.answers) {
+    return {
+      status: "waiting_input",
+      sessionId,
+      questions: [
+        {
+          question: "삭제 범위를 어디까지 잡을까요?",
+          header: "삭제 범위",
+          options: [
+            {
+              label: "해당 테이블만",
+              description: "요청에 명시된 테이블만 삭제합니다",
+            },
+            {
+              label: "연결 테이블까지",
+              description: "조인으로 연결된 데이터도 함께 삭제합니다",
+            },
+          ],
+          multiSelect: false,
+        },
+      ],
+      trace: [
+        { label: "유형 판별", detail: "데이터 강제 반영", elapsedMs: 400 },
+        { label: "대상 테이블 확인", detail: "2개", elapsedMs: 3200 },
+      ],
+    };
+  }
+
+  return {
+    status: "done",
+    sessionId,
+    answer: mockAnswer(req),
+    references: [
+      {
+        locator: "PKG_SU_CALC:412",
+        description: "SP_SU_JISA_CALC — 합산 기준 분기",
+      },
+      { locator: "TB_SU_JISA_RATE", description: "대상 지사 등록 행 없음" },
+    ],
+    trace: [
+      { label: "유형 판별", detail: labelOf(req.type), elapsedMs: 400 },
+      { label: "지식베이스 라우팅", detail: "수수료 파이프라인", elapsedMs: 1100 },
+      { label: "저장소 탐색", detail: "7개 파일", elapsedMs: 21700 },
+      { label: "DB 조회", detail: "4건", elapsedMs: 31400 },
+      { label: "응답 작성", elapsedMs: 52800 },
+    ],
+    usage: { elapsedMs: 107400, tokens: 38200, filesRead: 7, dbQueries: 4 },
+  };
+}
+
+function mockAnswer(req: EngineRequest): string {
+  if (req.answers) {
+    const picked = Object.values(req.answers).join(", ");
+    return `"${picked}" 기준으로 처리했습니다. 대상 147건을 확인했고 삭제 DML을 아래에 정리했습니다.\n\n(목업 응답입니다. ENGINE_URL을 설정하면 실제 엔진이 응답합니다.)`;
+  }
+  return `지급규정 개정이 원인입니다. 2026년 7월 31일 적용된 개정으로 산출 기준이 바뀌었고, 해당 건은 개정 후 기준값이 등록되어 있지 않아 0원으로 산출됩니다.\n\n(목업 응답입니다. ENGINE_URL을 설정하면 실제 엔진이 응답합니다.)`;
+}
+
+function labelOf(type: ChatType): string {
+  return type === "LOGIC_REVIEW"
+    ? "로직 확인"
+    : type === "ERP_FIX"
+      ? "ERP 단순 수정"
+      : "데이터 강제 반영";
+}
+
+function sleep(ms: number) {
+  return new Promise((r) => setTimeout(r, ms));
+}

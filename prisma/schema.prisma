@@ -1,0 +1,146 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// 회원사. 저장소와 DB가 회원사마다 따로라 대화는 항상 하나의 회원사에 묶인다.
+model Member {
+  id        String   @id
+  name      String
+  createdAt DateTime @default(now())
+
+  chats Chat[]
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  role      String   @default("operator")
+  createdAt DateTime @default(now())
+
+  chats  Chat[]
+  scores Score[]
+}
+
+/// 대화 한 묶음. 되묻기로 여러 턴이 이어질 수 있어 대화가 최상위 단위다.
+model Chat {
+  id    Int      @id @default(autoincrement())
+  type  ChatType
+  title String?
+
+  /// 엔진이 돌려준 Claude Agent SDK 세션 ID. 이어가기(resume)의 열쇠.
+  /// 세션 파일은 엔진 쪽 디스크에 있으므로 이 값만으로 재개가 보장되지는 않는다.
+  sessionId String?
+
+  memberId String
+  member   Member @relation(fields: [memberId], references: [id])
+  userId   String
+  user     User   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  turns Turn[]
+
+  @@index([createdAt])
+  @@index([type])
+  @@index([memberId])
+}
+
+/// 대화 안의 한 번 주고받기. 질문 하나와 그에 대한 처리·응답.
+model Turn {
+  id     Int        @id @default(autoincrement())
+  seq    Int
+  status TurnStatus @default(QUEUED)
+
+  question String
+  answer   String?
+
+  /// 엔진이 돌려준 원본 응답. 스키마가 바뀌어도 원본은 남겨둔다.
+  rawResult String?
+  /// 근거 목록 [{ locator, description }]
+  references String?
+  /// 처리 단계 [{ label, detail, elapsedMs }]
+  trace String?
+
+  /// 엔진이 되물은 내용. AskUserQuestion의 questions 배열 원본.
+  /// 값이 있고 status가 WAITING_INPUT이면 사용자 답을 기다리는 중이다.
+  pendingQuestions String?
+  /// 사용자가 돌려준 답 { 질문: 선택한 라벨 }
+  answeredInput String?
+
+  elapsedMs Int?
+  tokens    Int?
+  filesRead Int?
+  dbQueries Int?
+  error     String?
+
+  chatId Int
+  chat   Chat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  score Score?
+
+  @@unique([chatId, seq])
+  @@index([status])
+}
+
+/// 채점. 기준은 엔진팀이 정하고, 저장과 집계는 콘솔이 맡는다.
+/// 턴 단위로 매긴다 — 되묻기가 섞인 대화는 턴마다 품질이 갈리기 때문.
+model Score {
+  id Int @id @default(autoincrement())
+
+  pathAccuracy    Int
+  scopeMatch      Int
+  convention      Int
+  contentAccuracy Int
+  askBackSafety   Int
+  /// 다섯 항목 평균. 조회할 때마다 계산하지 않도록 저장해 둔다.
+  average Float
+  note    String?
+
+  turnId Int  @unique
+  turn   Turn @relation(fields: [turnId], references: [id], onDelete: Cascade)
+
+  scoredById String
+  scoredBy   User   @relation(fields: [scoredById], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+/// 지식베이스 문서.
+model WikiDoc {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  title     String
+  category  String
+  body      String
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  @@index([category])
+}
+
+enum ChatType {
+  LOGIC_REVIEW
+  ERP_FIX
+  FORCE_DML
+}
+
+enum TurnStatus {
+  QUEUED
+  RUNNING
+  /// 엔진이 되물어서 사용자 답을 기다리는 상태.
+  WAITING_INPUT
+  DONE
+  FAILED
+}
