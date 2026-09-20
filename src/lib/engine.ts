@@ -1,9 +1,4 @@
-/**
- * 엔진(엔진팀 영역) 호출부. 계약은 docs/engine-contract.md 참고.
- *
- * 이 파일 바깥에서는 엔진이 HTTP인지 큐인지, Agent SDK를 어떻게 부르는지 모른다.
- * ENGINE_URL이 없으면 목업으로 동작해서 엔진 없이도 콘솔을 개발할 수 있다.
- */
+// 계약: docs/engine-contract.md
 
 export type ChatType = "LOGIC_REVIEW";
 
@@ -11,9 +6,7 @@ export type EngineRequest = {
   type: ChatType;
   memberId: string;
   question: string;
-  /** 이어가기일 때만. 첫 턴에는 없다. */
   sessionId?: string;
-  /** 되묻기에 답할 때만. { 질문: 선택한 라벨 } */
   answers?: Record<string, string>;
 };
 
@@ -107,7 +100,6 @@ export async function runEngine(req: EngineRequest): Promise<EngineResponse> {
   }
 }
 
-/** 되묻기 왕복을 재현해서 엔진 없이도 콘솔 흐름을 검증할 수 있게 한다. */
 async function mockEngine(req: EngineRequest): Promise<EngineResponse> {
   await sleep(600);
 
@@ -163,7 +155,6 @@ async function mockEngine(req: EngineRequest): Promise<EngineResponse> {
   };
 }
 
-/** 질문에 조회 기준이 안 적혀 있으면 되묻는다. 목업의 되묻기 발동 조건. */
 function needsClarification(req: EngineRequest): boolean {
   if (req.answers) return false;
   return !/소계|개인별|명세|기준/.test(req.question);

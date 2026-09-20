@@ -2,9 +2,7 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-/** 되묻기가 섞인 대화를 포함해, 화면 개발에 필요한 최소한의 예시를 넣는다. */
 async function main() {
-  // 여러 번 돌려도 같은 상태가 되도록 대화부터 비운다. 턴과 채점은 cascade로 함께 지워진다.
   await prisma.chat.deleteMany();
 
   const [sangmin, jimin] = await Promise.all([
@@ -33,7 +31,6 @@ async function main() {
     }),
   ]);
 
-  // 한 번에 끝난 대화
   await prisma.chat.create({
     data: {
       type: "LOGIC_REVIEW",
@@ -79,7 +76,6 @@ async function main() {
     },
   });
 
-  // 되묻기를 거쳐 두 턴으로 끝난 대화
   await prisma.chat.create({
     data: {
       type: "LOGIC_REVIEW",
@@ -110,6 +106,19 @@ async function main() {
             answeredInput: JSON.stringify({
               "어느 화면에서 조회한 결과인가요?": "개인별 명세",
             }),
+            references: JSON.stringify([
+              { locator: "TB_HR_WICHOK_HIST", description: "평가 기간 중 상태 변경" },
+              { locator: "PKG_SU_CALC:880", description: "성과 산출 대상 필터" },
+            ]),
+            trace: JSON.stringify([
+              { label: "유형 판별", detail: "로직 확인", elapsedMs: 400 },
+              { label: "질문 분석", detail: "조회 화면 불명확", elapsedMs: 2400 },
+              { label: "저장소 탐색", detail: "5개 파일", elapsedMs: 18600 },
+              { label: "DB 조회", detail: "6건", elapsedMs: 27200 },
+            ]),
+            filesRead: 5,
+            dbQueries: 6,
+            tokens: 41700,
             elapsedMs: 94000,
             completedAt: new Date(),
             score: {
@@ -130,6 +139,16 @@ async function main() {
             question: "그러면 위촉 상태가 언제 바뀐 건지도 알 수 있나요?",
             answer:
               "위촉 이력 테이블 기준으로 2026년 6월 18일에 변경되었습니다. 평가 기간이 6월 전체라 산출 시점에는 이미 제외 대상이었습니다.",
+            references: JSON.stringify([
+              { locator: "TB_HR_WICHOK_HIST", description: "26.06.18 상태 변경 행" },
+            ]),
+            trace: JSON.stringify([
+              { label: "DB 조회", detail: "2건", elapsedMs: 9800 },
+              { label: "응답 작성", elapsedMs: 28400 },
+            ]),
+            filesRead: 0,
+            dbQueries: 2,
+            tokens: 12400,
             elapsedMs: 41000,
             completedAt: new Date(),
           },
@@ -138,7 +157,6 @@ async function main() {
     },
   });
 
-  // 되묻고 답을 기다리는 중인 대화
   await prisma.chat.create({
     data: {
       type: "LOGIC_REVIEW",
@@ -176,7 +194,36 @@ async function main() {
       slug: "commission-pipeline",
       title: "수수료 처리 파이프라인",
       category: "수수료",
-      body: "## 개요\n\n수수료 산출은 접수 → 검증 → 산출 → 확정 네 단계로 나뉜다.\n\n각 단계는 별도 프로시저로 구현되어 있으며, 단계 사이의 중간 결과는 임시 테이블에 남는다.",
+      body: [
+        "수수료 산출은 마감 확정부터 지급 확정까지 다섯 단계를 순서대로 거친다. 각 단계는 앞 단계 결과 테이블을 입력으로 받으며, 중간 단계를 건너뛰면 이후 산출값이 전부 어긋난다.",
+        "",
+        "## 단계별 프로시저",
+        "",
+        "프로시저 코드는 회원사와 버전에 따라 다르다. 아래는 `gist-v2` 기준이며, v1은 `SP_SU_*_OLD` 계열을 쓴다.",
+        "",
+        "| 단계 | 프로시저 | 산출 대상 | 결과 테이블 |",
+        "| --- | --- | --- | --- |",
+        "| 1 | `SP_SU_MAGAM` | 마감 확정 | `TB_SU_MAGAM` |",
+        "| 2 | `SP_SU_MOJIP_CALC` | 모집수수료 | `TB_SU_MOJIP` |",
+        "| 3 | `SP_SU_JISA_CALC` | 지사수수료 | `TB_SU_JISA` |",
+        "| 4 | `SP_SU_SEONGGWA` | 성과수수료 | `TB_SU_SEONGGWA` |",
+        "| 5 | `SP_SU_JIGUP_FIX` | 지급 확정 | `TB_SU_JIGUP` |",
+        "",
+        "> **0원 산출을 만났을 때** — 대부분 로직 결함이 아니라 마스터 데이터 누락이다. 먼저 해당 단계의 기준율 테이블(`TB_SU_*_RATE`)에 대상 행이 있는지 확인한다.",
+        "",
+        "## 추적 순서",
+        "",
+        "값이 이상할 때는 결과 테이블에서 거슬러 올라가는 편이 빠르다. 프로시저 내부의 `INSERT INTO` 대상 테이블명을 먼저 찾고, 그 테이블을 채우는 분기 조건을 확인하면 대부분 한 번에 원인이 잡힌다.",
+        "",
+        "- 결과 테이블에 대상 건이 아예 없는지, 값만 0인지 구분",
+        "- 기준율 테이블에 해당 조직·기간 행이 등록되어 있는지 확인",
+        "- 지급규정 개정일 전후로 분기가 갈리는지 확인",
+        "- 앞 단계 결과가 정상인지 역순으로 점검",
+        "",
+        "## 주의할 점",
+        "",
+        "지급규정이 개정되면 산출 기준 자체가 바뀐다. 개정일 이전 데이터와 이후 데이터를 같은 기준으로 비교하면 안 된다.",
+      ].join("\n"),
     },
     {
       slug: "cms-process",
@@ -190,12 +237,18 @@ async function main() {
       category: "이슈처리",
       body: "작성 예정.",
     },
+    {
+      slug: "payment-rule-history",
+      title: "지급규정 개정 이력",
+      category: "규정",
+      body: "작성 예정.",
+    },
   ];
 
   for (const doc of docs) {
     await prisma.wikiDoc.upsert({
       where: { slug: doc.slug },
-      update: {},
+      update: doc,
       create: doc,
     });
   }
