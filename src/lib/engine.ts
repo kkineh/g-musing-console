@@ -1,6 +1,23 @@
 // 계약: docs/engine-contract.md
 
-export type ChatType = "LOGIC_REVIEW";
+export type ChatType = "LOGIC_REVIEW" | "ERROR_CAUSE";
+
+export const CHAT_TYPES: { value: ChatType; label: string; hint: string }[] = [
+  {
+    value: "LOGIC_REVIEW",
+    label: "로직 문의",
+    hint: "어떤 기준으로 산출되는지, 어디서 결정되는지",
+  },
+  {
+    value: "ERROR_CAUSE",
+    label: "오류 원인 확인",
+    hint: "값이 안 맞거나 안 나오는 건의 원인",
+  },
+];
+
+export function chatTypeLabel(type: ChatType) {
+  return CHAT_TYPES.find((t) => t.value === type)?.label ?? type;
+}
 
 export type EngineRequest = {
   type: ChatType;

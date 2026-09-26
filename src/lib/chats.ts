@@ -1,5 +1,6 @@
 import { prisma } from "./db";
 import type {
+  ChatType,
   EngineResponse,
   PendingQuestion,
   Reference,
@@ -26,6 +27,7 @@ export type TurnView = {
 
 export type ChatView = {
   id: number;
+  type: ChatType;
   title: string | null;
   memberId: string;
   memberName: string;
@@ -56,6 +58,7 @@ export async function getChat(id: number): Promise<ChatView | null> {
 
   return {
     id: chat.id,
+    type: chat.type,
     title: chat.title,
     memberId: chat.memberId,
     memberName: chat.member.name,

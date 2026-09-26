@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
-import { EngineError, runEngine } from "@/lib/engine";
+import { CHAT_TYPES, EngineError, runEngine, type ChatType } from "@/lib/engine";
 import { applyEngineResult } from "@/lib/chats";
 import { currentUser, defaultMember } from "@/lib/session";
 
@@ -12,15 +12,21 @@ function titleFrom(question: string) {
   return line.length > 60 ? `${line.slice(0, 60)}…` : line;
 }
 
+function toChatType(value: FormDataEntryValue | null): ChatType {
+  const found = CHAT_TYPES.find((t) => t.value === value);
+  return found?.value ?? "LOGIC_REVIEW";
+}
+
 export async function askAction(formData: FormData) {
   const question = String(formData.get("question") ?? "").trim();
   if (!question) return;
 
+  const type = toChatType(formData.get("type"));
   const [user, memberId] = await Promise.all([currentUser(), defaultMember()]);
 
   const chat = await prisma.chat.create({
     data: {
-      type: "LOGIC_REVIEW",
+      type,
       title: titleFrom(question),
       memberId,
       userId: user.id,
@@ -33,7 +39,7 @@ export async function askAction(formData: FormData) {
 
   try {
     const result = await runEngine({
-      type: "LOGIC_REVIEW",
+      type,
       memberId,
       question,
     });
@@ -79,7 +85,7 @@ export async function answerAction(formData: FormData) {
 
   try {
     const result = await runEngine({
-      type: "LOGIC_REVIEW",
+      type: turn.chat.type,
       memberId: turn.chat.memberId,
       question: turn.question,
       sessionId: turn.chat.sessionId ?? undefined,
@@ -118,7 +124,7 @@ export async function followUpAction(formData: FormData) {
 
   try {
     const result = await runEngine({
-      type: "LOGIC_REVIEW",
+      type: chat.type,
       memberId: chat.memberId,
       question,
       sessionId: chat.sessionId ?? undefined,
