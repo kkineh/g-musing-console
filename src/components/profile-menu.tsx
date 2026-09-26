@@ -36,7 +36,7 @@ export function ProfileMenu() {
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="menu"
         aria-expanded={open}
-        className="grid size-[34px] place-items-center rounded-full bg-accent-soft text-[13px] font-semibold text-accent"
+        className="grid size-[26px] place-items-center rounded-lg bg-text text-[11px] font-bold text-surface"
       >
         한
       </button>
@@ -44,7 +44,7 @@ export function ProfileMenu() {
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-[42px] w-[190px] rounded-xl bg-surface p-1.5 shadow-card-lg"
+          className="absolute right-0 top-[38px] w-[190px] rounded-xl border border-line bg-surface p-1.5 shadow-card-lg"
         >
           <div className="px-3 py-2">
             <div className="text-sm font-semibold">한상민</div>

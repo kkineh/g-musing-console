@@ -32,6 +32,7 @@ export default async function HistoryPage({
           label="평균 점수"
           value={summary.averageScore?.toFixed(1) ?? "—"}
           note={summary.averageScore === null ? "채점 없음" : "채점된 턴 기준"}
+          accent
         />
         <SummaryCard label="최근 7일" value={summary.weekCount} note="질의 건수" />
         <SummaryCard
@@ -66,16 +67,20 @@ function SummaryCard({
   value,
   note,
   alert,
+  accent,
 }: {
   label: string;
   value: string | number;
   note: string;
   alert?: boolean;
+  accent?: boolean;
 }) {
   return (
-    <div className="rounded-xl bg-surface px-5 py-4.5 shadow-card-sm">
+    <div className="rounded-2xl border border-line bg-surface px-5 py-4.5 shadow-card-sm">
       <div className="mb-1.5 text-[13.5px] text-text-3">{label}</div>
-      <div className="text-[28px] leading-[1.15] font-bold tracking-[-0.03em] tabular-nums">
+      <div
+        className={`font-mono text-[28px] leading-[1.15] font-bold tracking-[-0.03em] tabular-nums ${accent ? "text-accent-deep" : "text-text"}`}
+      >
         {value}
       </div>
       <div

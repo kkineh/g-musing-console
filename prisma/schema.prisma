@@ -109,6 +109,7 @@ model WikiDoc {
   slug      String   @unique
   title     String
   category  String
+  author    String
   body      String
   updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
@@ -118,6 +119,7 @@ model WikiDoc {
 
 enum ChatType {
   LOGIC_REVIEW
+  ERROR_CAUSE
 }
 
 enum TurnStatus {

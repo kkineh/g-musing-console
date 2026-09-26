@@ -16,7 +16,7 @@ export function ThemeToggle() {
       type="button"
       onClick={toggle}
       aria-label="테마 전환"
-      className="grid size-[34px] place-items-center rounded-full bg-surface-3 text-text-2 hover:bg-line hover:text-text"
+      className="grid size-[30px] place-items-center rounded-lg text-text-3 hover:bg-surface-3 hover:text-text"
     >
       <svg
         viewBox="0 0 16 16"

@@ -35,7 +35,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="flex min-h-full flex-col">
         <TopNav />
-        <main className="mx-auto w-full max-w-[1080px] flex-1 px-7 pt-8 pb-16">
+        <main className="mx-auto w-full max-w-[900px] flex-1 px-6 pt-11 pb-[140px]">
           {children}
         </main>
       </body>

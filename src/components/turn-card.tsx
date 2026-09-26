@@ -1,6 +1,7 @@
 import type { TurnView } from "@/lib/chats";
 import { formatDuration, formatTime } from "@/lib/format";
 import { AskBackForm } from "./ask-back-form";
+import { EvidenceMap } from "./evidence-map";
 
 export function TurnCard({
   turn,
@@ -11,7 +12,7 @@ export function TurnCard({
 }) {
   return (
     <div className="flex flex-col gap-4.5">
-      <section className="rounded-2xl bg-surface px-5.5 py-5 shadow-card">
+      <section className="rounded-2xl border border-line bg-surface px-6 py-5.5 shadow-card-sm">
         <Head
           avatar={userName.charAt(0)}
           who={userName}
@@ -22,24 +23,32 @@ export function TurnCard({
             </>
           }
         />
-        <p className="text-[15px] leading-[1.75] whitespace-pre-wrap text-text-2">
+        <p className="text-[15.5px] leading-[1.68] whitespace-pre-wrap text-text">
           {turn.question}
         </p>
       </section>
 
-      <section className="overflow-hidden rounded-2xl bg-surface shadow-card">
-        <div className="px-5.5 py-5">
-          <Head
-            avatar="M"
-            who="Musing"
-            agent
-            meta={
-              turn.elapsedMs ? (
-                <Pill plain>{formatDuration(turn.elapsedMs)}</Pill>
-              ) : null
-            }
-          />
+      <section className="overflow-hidden rounded-2xl border border-line bg-surface shadow-card-sm">
+        <div className="flex items-center gap-2.5 border-b border-dashed border-line px-6 py-4">
+          <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-text">
+            <svg viewBox="0 0 24 24" fill="none" className="size-4">
+              <path
+                d="M12 2L4 6V12C4 16.5 7.5 20.5 12 22C16.5 20.5 20 16.5 20 12V6L12 2Z"
+                stroke="white"
+                strokeWidth="1.8"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </span>
+          <span className="text-[14.5px] font-bold">에이전트</span>
+          {turn.elapsedMs && (
+            <span className="ml-1 font-mono text-[12px] text-text-3">
+              {formatTime(turn.createdAt)} · {formatDuration(turn.elapsedMs)} 소요
+            </span>
+          )}
+        </div>
 
+        <div className="px-6 py-5">
           {turn.trace.length > 0 && <Trace turn={turn} />}
 
           {turn.status === "RUNNING" && (
@@ -59,25 +68,28 @@ export function TurnCard({
           {turn.answeredInput && <Answered answered={turn.answeredInput} />}
 
           {turn.answer && (
-            <div className="text-[15.5px] leading-[1.85] whitespace-pre-wrap text-text-2">
+            <div className="text-[15.5px] leading-[1.75] whitespace-pre-wrap text-text">
               {turn.answer}
             </div>
           )}
 
+          {turn.references.length > 0 && <EvidenceMap references={turn.references} />}
+
           {turn.references.length > 0 && (
-            <div className="mt-5 flex flex-col gap-1.5">
-              <h4 className="mb-0.5 text-[13px] font-semibold text-text-3">
-                근거
-              </h4>
+            <div className="mt-4.5 flex flex-col gap-2">
+              <div className="text-[12px] font-bold text-text-3">
+                근거 {turn.references.length}건 상세
+              </div>
               {turn.references.map((ref) => (
                 <div
                   key={ref.locator}
-                  className="flex flex-wrap items-center gap-3 rounded-lg bg-surface-2 px-3.5 py-2.5"
+                  className="flex flex-wrap items-center gap-2.5 rounded-lg border border-line bg-bg px-3 py-2.5"
                 >
-                  <span className="font-mono text-[13px] font-medium whitespace-nowrap text-accent">
+                  <span className="size-[7px] shrink-0 rounded-full bg-gray-node-line" />
+                  <span className="font-mono text-[12.5px] font-semibold text-text">
                     {ref.locator}
                   </span>
-                  <span className="text-[13.5px] text-text-3">
+                  <span className="ml-auto text-right text-[12px] text-text-3">
                     {ref.description}
                   </span>
                 </div>
@@ -95,27 +107,19 @@ export function TurnCard({
 function Head({
   avatar,
   who,
-  agent,
   meta,
 }: {
   avatar: string;
   who: string;
-  agent?: boolean;
   meta?: React.ReactNode;
 }) {
   return (
     <div className="mb-3 flex items-center gap-2.5">
-      <span
-        className={
-          agent
-            ? "grid size-[30px] shrink-0 place-items-center rounded-full bg-accent text-xs font-semibold text-on-accent"
-            : "grid size-[30px] shrink-0 place-items-center rounded-full bg-surface-3 text-xs font-semibold text-text-2"
-        }
-      >
+      <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-text text-[13px] font-bold text-surface">
         {avatar}
       </span>
-      <span className="text-sm font-semibold">{who}</span>
-      <span className="ml-auto flex items-center gap-2.5">{meta}</span>
+      <span className="text-[14.5px] font-bold">{who}</span>
+      <span className="ml-auto flex items-center gap-2">{meta}</span>
     </div>
   );
 }
@@ -131,8 +135,8 @@ function Pill({
     <span
       className={
         plain
-          ? "rounded-full bg-surface-3 px-2.5 py-0.5 text-[12.5px] text-text-3"
-          : "rounded-full bg-accent-soft px-2.5 py-0.5 text-[12.5px] font-medium text-accent"
+          ? "text-[12px] text-text-3"
+          : "rounded-md bg-accent-soft px-2.5 py-1 text-[11.5px] font-semibold text-accent-deep"
       }
     >
       {children}
@@ -142,7 +146,7 @@ function Pill({
 
 function Answered({ answered }: { answered: Record<string, string> }) {
   return (
-    <div className="mb-4 rounded-xl bg-surface-2 px-4 py-3.5">
+    <div className="mb-4 rounded-xl border border-line bg-bg px-4 py-3.5">
       <div className="mb-2 text-[12.5px] font-semibold text-text-3">
         되물어 확인한 것
       </div>
@@ -150,7 +154,7 @@ function Answered({ answered }: { answered: Record<string, string> }) {
         {Object.entries(answered).map(([q, a]) => (
           <div key={q} className="text-[13.5px] text-text-2">
             {q}{" "}
-            <span className="font-medium text-accent">{a}</span>
+            <span className="font-medium text-accent-deep">{a}</span>
           </div>
         ))}
       </div>
@@ -162,45 +166,46 @@ function Trace({ turn }: { turn: TurnView }) {
   const total = turn.trace.reduce((sum, s) => sum + s.elapsedMs, 0);
 
   return (
-    <details className="mb-4 overflow-hidden rounded-xl bg-surface-2">
-      <summary className="flex cursor-pointer list-none items-center gap-2.5 px-4 py-2.5 text-[13.5px] text-text-2 [&::-webkit-details-marker]:hidden">
+    <details className="group mb-4">
+      <summary className="flex cursor-pointer list-none items-center gap-2.5 py-3 text-[13px] font-semibold text-text-2 [&::-webkit-details-marker]:hidden">
         <svg
-          viewBox="0 0 12 12"
+          viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          strokeWidth="1.8"
-          className="size-3 text-text-3"
+          strokeWidth="2"
+          className="size-4 text-text-3 transition-transform duration-200 group-open:rotate-90"
         >
-          <path d="M4.5 2.5L8 6l-3.5 3.5" />
+          <path d="M6 9l6 6 6-6" transform="rotate(-90 12 12)" />
         </svg>
-        <span>
-          <b className="font-semibold text-text">{turn.trace.length}단계</b>를
-          거쳤습니다
-        </span>
-        <span className="ml-auto font-[tabular-nums] text-[13px] text-text-3">
+        <span>처리 단계 {turn.trace.length}개</span>
+        <span className="ml-auto rounded-md border border-line bg-bg px-2.5 py-1 font-mono text-[12px] font-bold text-text-2">
           {formatDuration(total)}
         </span>
       </summary>
-      <div className="pt-0.5 pb-2">
+      <div className="relative pt-1 pb-3 pl-0.5">
+        <div
+          aria-hidden
+          className="absolute top-1.5 bottom-1.5 left-[15px] w-px"
+          style={{
+            backgroundImage:
+              "linear-gradient(var(--border) 60%, transparent 0%)",
+            backgroundSize: "1px 6px",
+            backgroundRepeat: "repeat-y",
+          }}
+        />
         {turn.trace.map((step, i) => (
           <div
             key={`${step.label}-${i}`}
-            className="grid grid-cols-[20px_1fr_auto] items-center gap-2.5 px-4 py-1.5 text-[13.5px] text-text-2"
+            className="relative grid grid-cols-[32px_1fr_auto] items-center gap-3 py-[7px]"
           >
-            <svg
-              viewBox="0 0 14 14"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              className="size-[15px] text-good"
-            >
-              <path d="M2.5 7.5l3 3 6-7" />
-            </svg>
-            <span>
-              {step.label}
-              {step.detail ? ` — ${step.detail}` : ""}
+            <span className="z-[1] grid size-[31px] place-items-center rounded-full border-[1.5px] border-gray-node-line bg-surface text-[11px] font-extrabold text-text-2">
+              {i + 1}
             </span>
-            <span className="font-[tabular-nums] text-[12.5px] text-text-3">
+            <span className="text-[13.5px] font-medium text-text">
+              {step.label}
+              {step.detail ? ` · ${step.detail}` : ""}
+            </span>
+            <span className="font-mono text-[12px] text-text-3">
               {formatDuration(step.elapsedMs)}
             </span>
           </div>
@@ -220,10 +225,10 @@ function Usage({ turn }: { turn: TurnView }) {
   if (items.length === 0) return null;
 
   return (
-    <div className="mt-5 flex flex-wrap gap-6 border-t border-line-soft pt-4">
+    <div className="mt-5 flex flex-wrap gap-6 border-t border-line pt-4">
       {items.map(([label, value]) => (
-        <div key={label} className="text-[13.5px]">
-          <span className="mb-0.5 block text-[12.5px] text-text-3">
+        <div key={label} className="font-mono text-[13px] font-semibold text-text">
+          <span className="mb-0.5 block font-sans text-[11.5px] font-semibold text-text-3">
             {label}
           </span>
           {value}

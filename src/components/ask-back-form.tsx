@@ -12,7 +12,7 @@ export function AskBackForm({
   questions: PendingQuestion[];
 }) {
   return (
-    <form action={answerAction} className="rounded-xl bg-warn-soft p-4.5">
+    <form action={answerAction} className="rounded-xl border border-line bg-warn-soft p-4.5">
       <input type="hidden" name="turnId" value={turnId} />
 
       <div className="mb-3.5 flex items-center gap-2">
@@ -41,7 +41,7 @@ export function AskBackForm({
               {q.options.map((opt) => (
                 <label
                   key={opt.label}
-                  className="flex cursor-pointer items-start gap-3 rounded-lg bg-surface px-3.5 py-3 hover:shadow-card-sm has-checked:ring-2 has-checked:ring-accent-line"
+                  className="flex cursor-pointer items-start gap-3 rounded-lg border border-line bg-surface px-3.5 py-3 hover:border-gray-node-line has-checked:ring-2 has-checked:ring-accent-line"
                 >
                   <input
                     type={q.multiSelect ? "checkbox" : "radio"}
@@ -77,7 +77,7 @@ function Submit() {
     <button
       type="submit"
       disabled={pending}
-      className="mt-4 rounded-full bg-accent px-4 py-2 text-[13.5px] font-medium text-on-accent hover:opacity-90 disabled:opacity-60"
+      className="mt-4 rounded-lg bg-accent px-4 py-2 text-[13.5px] font-medium text-on-accent hover:opacity-90 disabled:opacity-60"
     >
       {pending ? "엔진 처리 중…" : "답하고 이어가기"}
     </button>

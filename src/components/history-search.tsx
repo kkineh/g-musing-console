@@ -36,7 +36,7 @@ export function HistorySearch({ defaultValue }: { defaultValue: string }) {
         onChange={(e) => setValue(e.target.value)}
         placeholder="질문, 답변 내용 검색"
         aria-busy={pending}
-        className="w-full rounded-full bg-surface py-2.5 pr-4 pl-9 text-sm text-text shadow-card-sm outline-none placeholder:text-text-3 focus:outline-2 focus:outline-accent-line"
+        className="w-full rounded-lg border border-line bg-surface py-2.5 pr-4 pl-9 text-sm text-text outline-none placeholder:text-text-3 focus:outline-2 focus:outline-accent-line"
       />
     </div>
   );

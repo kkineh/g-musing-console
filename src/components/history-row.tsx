@@ -24,7 +24,7 @@ export function HistoryRowCard({ row }: { row: HistoryRow }) {
   ].filter(Boolean) as [string, string][];
 
   return (
-    <div className="rounded-xl bg-surface px-5 py-4 shadow-card-sm">
+    <div className="rounded-2xl border border-line bg-surface px-5 py-4 shadow-card-sm">
       <div className="mb-2 flex flex-wrap items-center gap-2.5">
         <span className="font-mono text-[13px] text-text-3">
           {chatNo(row.id)}
@@ -62,7 +62,7 @@ export function HistoryRowCard({ row }: { row: HistoryRow }) {
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
           aria-label={open ? "요약 접기" : "요약 펼치기"}
-          className="grid size-6 shrink-0 cursor-pointer place-items-center rounded-full text-text-3 hover:bg-surface-3 hover:text-text"
+          className="grid size-6 shrink-0 cursor-pointer place-items-center rounded-md text-text-3 hover:bg-surface-3 hover:text-text"
         >
           <svg
             viewBox="0 0 12 12"
@@ -78,8 +78,10 @@ export function HistoryRowCard({ row }: { row: HistoryRow }) {
 
       <div className="flex flex-wrap gap-4 text-[13px] text-text-3">
         <span>{row.userName}</span>
-        {row.elapsedMs !== null && <span>{formatDuration(row.elapsedMs)}</span>}
-        <span>{formatDateTime(row.createdAt)}</span>
+        {row.elapsedMs !== null && (
+          <span className="font-mono text-[12.5px]">{formatDuration(row.elapsedMs)}</span>
+        )}
+        <span className="font-mono text-[12.5px]">{formatDateTime(row.createdAt)}</span>
       </div>
 
       {open && (
@@ -99,7 +101,7 @@ export function HistoryRowCard({ row }: { row: HistoryRow }) {
                   <span className="mb-0.5 block text-[12.5px] text-text-3">
                     {label}
                   </span>
-                  {value}
+                  <span className="font-mono">{value}</span>
                 </div>
               ))}
             </div>
@@ -107,7 +109,7 @@ export function HistoryRowCard({ row }: { row: HistoryRow }) {
 
           <Link
             href={`/c/${row.id}`}
-            className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-surface-3 px-4 py-2 text-[13.5px] font-medium text-text-2 hover:bg-line hover:text-text"
+            className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-line bg-surface-2 px-4 py-2 text-[13.5px] font-medium text-text-2 hover:border-gray-node-line hover:text-text"
           >
             대화 열기
             <svg
@@ -142,11 +144,11 @@ function Tag({
     : warn
       ? "bg-warn-soft text-warn"
       : accent
-        ? "bg-accent-soft text-accent"
+        ? "bg-accent-soft text-accent-deep"
         : "bg-surface-3 text-text-2";
 
   return (
-    <span className={`rounded-full px-2.5 py-0.5 text-[12.5px] ${tone}`}>
+    <span className={`rounded-md px-2.5 py-0.5 text-[12.5px] ${tone}`}>
       {children}
     </span>
   );
@@ -155,14 +157,14 @@ function Tag({
 function Score({ value }: { value: number }) {
   const tone =
     value >= 8
-      ? "bg-good-soft text-good"
-      : value >= 6
-        ? "bg-warn-soft text-warn"
+      ? "bg-accent-soft text-accent-deep"
+      : value >= 5.5
+        ? "bg-surface-3 text-text-2"
         : "bg-danger-soft text-danger";
 
   return (
     <span
-      className={`rounded-full px-3 py-0.5 text-sm font-bold tabular-nums ${tone}`}
+      className={`rounded-md px-2.5 py-0.5 font-mono text-sm font-bold tabular-nums ${tone}`}
     >
       {value.toFixed(1)}
     </span>

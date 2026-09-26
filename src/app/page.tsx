@@ -38,13 +38,13 @@ export default async function AskPage() {
               <Link
                 key={chat.id}
                 href={`/c/${chat.id}`}
-                className="rounded-xl bg-surface px-5 py-3.5 shadow-card-sm hover:shadow-card"
+                className="rounded-2xl border border-line bg-surface px-5 py-3.5 shadow-card-sm hover:border-gray-node-line"
               >
                 <div className="mb-1 flex items-center gap-2.5">
                   <span className="font-mono text-[13px] text-text-3">
                     {chatNo(chat.id)}
                   </span>
-                  <span className="rounded-full bg-surface-3 px-2.5 py-0.5 text-[12.5px] text-text-2">
+                  <span className="rounded-md bg-surface-3 px-2.5 py-0.5 text-[12.5px] text-text-2">
                     {chat.member.name}
                   </span>
                 </div>

@@ -22,7 +22,7 @@ export default async function ChatPage({ params }: PageProps<"/c/[id]">) {
         <span className="font-mono text-[13px] text-text-3">
           {chatNo(chat.id)}
         </span>
-        <span className="rounded-full bg-surface-3 px-2.5 py-0.5 text-[12.5px] text-text-2">
+        <span className="rounded-md bg-surface-3 px-2.5 py-0.5 text-[12.5px] text-text-2">
           {chat.memberName}
         </span>
       </div>
