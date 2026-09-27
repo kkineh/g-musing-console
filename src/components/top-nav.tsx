@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "./theme-toggle";
@@ -17,11 +18,15 @@ export function TopNav() {
   return (
     <nav className="sticky top-0 z-10 border-b border-line-soft bg-surface/90 backdrop-blur-sm">
       <div className="mx-auto flex h-[62px] max-w-[1080px] items-center gap-8 px-7">
-        <Link href="/" className="flex shrink-0 items-center gap-2.5">
-          <span className="size-[9px] shrink-0 rounded-full bg-accent shadow-[0_0_0_4px_var(--accent-soft)]" />
-          <span className="text-[16px] font-extrabold tracking-[-0.02em]">
-            musing
-          </span>
+        <Link href="/" className="flex shrink-0 items-center">
+          <Image
+            src="/logo.svg"
+            alt="musing"
+            width={34}
+            height={32}
+            priority
+            className="shrink-0"
+          />
         </Link>
 
         <div className="flex gap-1">
