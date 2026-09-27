@@ -85,6 +85,12 @@ function Field({ placeholder }: { placeholder: string }) {
         el.style.height = "auto";
         el.style.height = `${Math.min(el.scrollHeight, 220)}px`;
       }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
+          e.preventDefault();
+          ref.current?.form?.requestSubmit();
+        }
+      }}
       className="block min-h-[52px] w-full resize-none bg-transparent px-4 py-3.5 text-[14.5px] leading-[1.7] text-text outline-none placeholder:text-text-3 disabled:opacity-60"
     />
   );
