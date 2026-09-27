@@ -25,6 +25,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="ko"
       className={`${inter.variable} ${notoSansKr.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <head>
         <script
