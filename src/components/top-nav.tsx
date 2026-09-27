@@ -25,7 +25,15 @@ export function TopNav() {
             width={34}
             height={32}
             priority
-            className="shrink-0"
+            className="logo-light shrink-0"
+          />
+          <Image
+            src="/logo-dark.svg"
+            alt="musing"
+            width={34}
+            height={32}
+            priority
+            className="logo-dark shrink-0"
           />
         </Link>
 

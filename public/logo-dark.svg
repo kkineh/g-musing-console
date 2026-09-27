@@ -1,0 +1,21 @@
+<svg width="305" height="287" viewBox="0 0 305 287" fill="none" xmlns="http://www.w3.org/2000/svg">
+<circle cx="16" cy="28" r="8.5" fill="#464646" stroke="#464646" stroke-width="7"/>
+<circle cx="119" cy="254" r="8.5" fill="#464646" stroke="#464646" stroke-width="7"/>
+<circle cx="293" cy="263" r="8.5" fill="#464646" stroke="#464646" stroke-width="7"/>
+<circle cx="12" cy="271" r="8.5" fill="#464646" stroke="#464646" stroke-width="7"/>
+<circle cx="201" cy="275" r="8.5" fill="#464646" stroke="#464646" stroke-width="7"/>
+<circle cx="216" cy="189" r="8.5" fill="#464646" stroke="#464646" stroke-width="7"/>
+<circle cx="271" cy="126" r="8.5" fill="#464646" stroke="#464646" stroke-width="7"/>
+<circle cx="253" cy="12" r="8.5" fill="#464646" stroke="#464646" stroke-width="7"/>
+<circle cx="129" cy="27" r="8.5" fill="#464646" stroke="#464646" stroke-width="7"/>
+<circle cx="24" cy="146" r="8.5" fill="#464646" stroke="#464646" stroke-width="7"/>
+<path d="M11.5 271L60.5 218.5L119.5 255.5L144 167.5M144 167.5L129.5 28M144 167.5L217 190.5L201 275.5M91 65.5L129.5 28L207 53M207 53L270.5 125.5L241.5 230.5L293.5 263.5M207 53L255 15.5M85.5 65.5L16 28" stroke="#464646" stroke-width="10"/>
+<path d="M24 144.5L143.5 167.5L271.5 127.5" stroke="#464646" stroke-width="10"/>
+<path d="M59.5 218C55.1667 167.667 13.2 26.3 16 27.5M16 27.5L25 145.5L12.5 271L118 255.5L201.5 276L294 263.5L272 127L255 14.5L129.5 28L16 27.5Z" stroke="#464646" stroke-width="10"/>
+<circle cx="60" cy="217" r="6" stroke="#668CF7" stroke-width="12"/>
+<circle cx="205" cy="53" r="6" stroke="#668CF7" stroke-width="12"/>
+<circle cx="241" cy="230" r="6" stroke="#668CF7" stroke-width="12"/>
+<circle cx="85" cy="66" r="6" stroke="#668CF7" stroke-width="12"/>
+<path d="M61.5 217L86 68.5L143.5 167.5L205 56L241 229" stroke="#668CF7" stroke-width="12" stroke-linejoin="bevel"/>
+<circle cx="143" cy="167" r="6" stroke="#668CF7" stroke-width="12"/>
+</svg>
