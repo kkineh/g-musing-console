@@ -19,14 +19,21 @@ SR(Service Request) 대응 자동화 서비스의 관리자 콘솔.
 ```
 src/
 ├── app/            화면과 API 라우트 (파일 위치가 곧 URL)
+├── components/     화면 조각
 └── lib/
     ├── db.ts       Prisma 클라이언트
-    └── engine.ts   엔진 호출부 — 팀 경계가 드러나는 유일한 파일
+    ├── engine.ts   엔진 호출부 — 팀 경계가 드러나는 유일한 파일
+    ├── chats.ts    대화·턴 조회
+    └── wiki.ts     지식베이스 조회
 prisma/
 ├── schema.prisma   대화·턴·채점·문서
 └── seed.ts         화면 개발용 예시 데이터
+contract/
+├── engine.ts       계약 원본 (TypeScript + Zod)
+├── openapi.json    생성물 — 문서와 목업이 이걸 읽는다
+└── index.html      Scalar 문서 페이지
 docs/
-└── engine-contract.md   엔진과 주고받는 규약
+└── engine-contract.md   배경과 협의 사항 (형식은 contract/가 정본)
 ```
 
 엔진은 이 저장소에 없다. `lib/engine.ts`가 HTTP로 부르고, `ENGINE_URL`이
@@ -55,17 +62,66 @@ pnpm dev
 
 `http://localhost:3000`
 
+엔진 없이도 돌아간다. `ENGINE_URL`이 없으면 `lib/engine.ts`의 목업이 답한다.
+
+## 엔진을 목업으로 붙여서 개발하기
+
+계약에서 만든 목업 서버를 쓰면 실제 HTTP 왕복까지 확인할 수 있다.
+
+```bash
+pnpm contract:mock                            # 터미널 1 — localhost:4000
+ENGINE_URL=http://localhost:4000 pnpm dev     # 터미널 2
+```
+
+응답 종류를 골라 받는다.
+
+```bash
+curl -X POST localhost:4000/process \
+  -H 'content-type: application/json' \
+  -H 'Prefer: example=waiting_input' \
+  -d '{"question":"지사수수료계가 0원입니다","memberId":"hll"}'
+```
+
+`example=` 에 `done` / `waiting_input` / `failed`. 없으면 `done`.
+스펙에 안 맞는 요청은 **422**로 막힌다.
+
 ## 스크립트
 
-| 명령 | 설명 |
+**개발**
+
+| 명령 | 설명 | 주소 |
+| --- | --- | --- |
+| `pnpm dev` | 개발 서버 | `:3000` |
+| `pnpm build` | 프로덕션 빌드 | |
+| `pnpm start` | 빌드 결과 실행 | `:3000` |
+| `pnpm typecheck` | 타입 검사 | |
+| `pnpm lint` | 린트 | |
+
+**DB**
+
+| 명령 | 설명 | 주소 |
+| --- | --- | --- |
+| `pnpm db:migrate` | 마이그레이션 생성·적용 | |
+| `pnpm db:seed` | 예시 데이터 (여러 번 돌려도 안전) | |
+| `pnpm db:studio` | DB 브라우저 | `:5555` |
+| `pnpm db:reset` | 전부 지우고 다시 | |
+
+**계약** — 자세한 건 `contract/README.md`
+
+| 명령 | 설명 | 주소 |
+| --- | --- | --- |
+| `pnpm contract` | `openapi.json` 생성 | |
+| `pnpm contract:docs` | API 문서 (Scalar) | `:4100` |
+| `pnpm contract:mock` | 목업 엔진 (Prism) | `:4000` |
+
+## 포트
+
+| 포트 | 무엇 |
 | --- | --- |
-| `pnpm dev` | 개발 서버 |
-| `pnpm build` | 프로덕션 빌드 |
-| `pnpm typecheck` | 타입 검사 |
-| `pnpm lint` | 린트 |
-| `pnpm db:migrate` | 마이그레이션 생성·적용 |
-| `pnpm db:seed` | 예시 데이터 (여러 번 돌려도 안전) |
-| `pnpm db:studio` | DB 브라우저 |
+| 3000 | 콘솔 |
+| 4000 | 목업 엔진 |
+| 4100 | API 문서 |
+| 5555 | Prisma Studio |
 
 ## 기술 선택
 
