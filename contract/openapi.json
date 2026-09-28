@@ -1,0 +1,484 @@
+{
+  "info": {
+    "title": "musing 엔진 API",
+    "version": "0.1.0",
+    "description": "콘솔(서비스팀)과 엔진(엔진팀) 사이의 유일한 접점. 계약은 contract/engine.ts에 TypeScript로 정의하고 이 문서를 생성한다."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:4000",
+      "description": "로컬 엔진"
+    }
+  ],
+  "openapi": "3.1.1",
+  "paths": {
+    "/process": {
+      "post": {
+        "operationId": "process",
+        "summary": "질의 처리",
+        "description": "새 대화를 시작하거나 기존 대화를 이어간다. 되묻기가 필요하면 waiting_input으로 돌려주고, 사용자 답을 받아 다시 호출된다.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "question": {
+                    "type": "string"
+                  },
+                  "memberId": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "enum": [
+                      "LOGIC_REVIEW",
+                      "ERROR_CAUSE"
+                    ],
+                    "type": "string",
+                    "description": "엔진이 스스로 판별하면 불필요. 협의 대상"
+                  },
+                  "sessionId": {
+                    "type": "string",
+                    "description": "이어가기일 때만. 첫 턴에는 없다"
+                  },
+                  "answers": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "description": "되묻기에 답할 때만. { 질문: 선택한 라벨 }"
+                  }
+                },
+                "required": [
+                  "question",
+                  "memberId"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "const": "done"
+                        },
+                        "sessionId": {
+                          "type": "string"
+                        },
+                        "answer": {
+                          "type": "string"
+                        },
+                        "references": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "locator": {
+                                "type": "string"
+                              },
+                              "description": {
+                                "type": "string"
+                              },
+                              "source": {
+                                "enum": [
+                                  "repo",
+                                  "db",
+                                  "knowledge"
+                                ],
+                                "type": "string"
+                              },
+                              "usedInAnswer": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "locator",
+                              "description",
+                              "source"
+                            ]
+                          }
+                        },
+                        "trace": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "label": {
+                                "type": "string"
+                              },
+                              "detail": {
+                                "type": "string"
+                              },
+                              "elapsedMs": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              }
+                            },
+                            "required": [
+                              "label",
+                              "elapsedMs"
+                            ]
+                          }
+                        },
+                        "usage": {
+                          "type": "object",
+                          "properties": {
+                            "elapsedMs": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "tokens": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "filesRead": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            },
+                            "dbQueries": {
+                              "type": "integer",
+                              "minimum": -9007199254740991,
+                              "maximum": 9007199254740991
+                            }
+                          },
+                          "required": [
+                            "elapsedMs"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "sessionId",
+                        "answer",
+                        "references",
+                        "trace",
+                        "usage"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "const": "waiting_input"
+                        },
+                        "sessionId": {
+                          "type": "string"
+                        },
+                        "questions": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "question": {
+                                "type": "string"
+                              },
+                              "header": {
+                                "type": "string"
+                              },
+                              "options": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "label": {
+                                      "type": "string"
+                                    },
+                                    "description": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "label",
+                                    "description"
+                                  ]
+                                }
+                              },
+                              "multiSelect": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "question",
+                              "header",
+                              "options",
+                              "multiSelect"
+                            ]
+                          }
+                        },
+                        "trace": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "label": {
+                                "type": "string"
+                              },
+                              "detail": {
+                                "type": "string"
+                              },
+                              "elapsedMs": {
+                                "type": "integer",
+                                "minimum": -9007199254740991,
+                                "maximum": 9007199254740991
+                              }
+                            },
+                            "required": [
+                              "label",
+                              "elapsedMs"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "sessionId",
+                        "questions",
+                        "trace"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "const": "failed"
+                        },
+                        "sessionId": {
+                          "type": "string"
+                        },
+                        "error": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "status",
+                        "error"
+                      ]
+                    }
+                  ]
+                },
+                "examples": {
+                  "done": {
+                    "summary": "답변 완료",
+                    "value": {
+                      "status": "done",
+                      "sessionId": "5b3f2c1a-8d4e-4f91-a0c7-2e1b9d3f6a84",
+                      "answer": "지급규정 개정이 원인입니다. 2026년 7월 31일 적용된 개정으로 산출 기준이 조직육성지급율 합산 방식으로 바뀌었고, 해당 지사는 개정 후 기준값이 등록되어 있지 않아 합산 대상이 없는 상태로 계산됩니다.",
+                      "references": [
+                        {
+                          "locator": "PKG_SU_CALC:412",
+                          "description": "합산 기준 분기",
+                          "source": "repo",
+                          "usedInAnswer": true
+                        },
+                        {
+                          "locator": "TB_SU_JISA_RATE",
+                          "description": "대상 지사 등록 행 없음",
+                          "source": "db",
+                          "usedInAnswer": true
+                        },
+                        {
+                          "locator": "수수료 처리 파이프라인",
+                          "description": "0원 산출 시 확인 순서",
+                          "source": "knowledge",
+                          "usedInAnswer": true
+                        }
+                      ],
+                      "trace": [
+                        {
+                          "label": "유형 판별",
+                          "detail": "로직 문의",
+                          "elapsedMs": 400
+                        },
+                        {
+                          "label": "저장소 탐색",
+                          "detail": "7개 파일",
+                          "elapsedMs": 21700
+                        },
+                        {
+                          "label": "DB 조회",
+                          "detail": "4건",
+                          "elapsedMs": 31400
+                        },
+                        {
+                          "label": "응답 작성",
+                          "elapsedMs": 52800
+                        }
+                      ],
+                      "usage": {
+                        "elapsedMs": 107400,
+                        "tokens": 38200,
+                        "filesRead": 7,
+                        "dbQueries": 4
+                      }
+                    }
+                  },
+                  "waiting_input": {
+                    "summary": "되묻기 — 사용자 답을 기다림",
+                    "value": {
+                      "status": "waiting_input",
+                      "sessionId": "5b3f2c1a-8d4e-4f91-a0c7-2e1b9d3f6a84",
+                      "questions": [
+                        {
+                          "question": "어느 화면에서 조회한 결과인가요?",
+                          "header": "조회 화면",
+                          "options": [
+                            {
+                              "label": "지사 소계",
+                              "description": "지사 단위로 합산한 화면"
+                            },
+                            {
+                              "label": "개인별 명세",
+                              "description": "설계사 단위 내역 화면"
+                            }
+                          ],
+                          "multiSelect": false
+                        }
+                      ],
+                      "trace": [
+                        {
+                          "label": "유형 판별",
+                          "detail": "로직 문의",
+                          "elapsedMs": 400
+                        },
+                        {
+                          "label": "질문 분석",
+                          "detail": "조회 기준 불명확",
+                          "elapsedMs": 2800
+                        }
+                      ]
+                    }
+                  },
+                  "failed": {
+                    "summary": "실패",
+                    "value": {
+                      "status": "failed",
+                      "error": "저장소 사본 최신화 실패: 인증 오류"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cancel": {
+      "post": {
+        "operationId": "cancel",
+        "summary": "처리 중단",
+        "description": "사용자가 취소를 눌렀을 때. 실행을 멈추고 저장소 사본을 정리한다.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "sessionId": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "sessionId"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "canceled": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "canceled"
+                  ]
+                },
+                "examples": {
+                  "canceled": {
+                    "summary": "중단됨",
+                    "value": {
+                      "canceled": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "health",
+        "summary": "상태 확인",
+        "description": "엔진이 살아있는지, 지금 몇 건을 처리 중인지.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "running": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    },
+                    "queued": {
+                      "type": "integer",
+                      "minimum": -9007199254740991,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "ok",
+                    "running",
+                    "queued"
+                  ]
+                },
+                "examples": {
+                  "ok": {
+                    "summary": "1건 처리 중",
+                    "value": {
+                      "ok": true,
+                      "running": 1,
+                      "queued": 0
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
