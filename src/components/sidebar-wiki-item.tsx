@@ -13,9 +13,32 @@ const ICON = (
   </>
 );
 
+function nodeKey(node: WikiCategoryNode) {
+  return node.path.join("/");
+}
+
+function allKeys(nodes: WikiCategoryNode[]): string[] {
+  return nodes.flatMap((n) => [nodeKey(n), ...allKeys(n.children)]);
+}
+
+function ancestorKeys(nodes: WikiCategoryNode[], activePath: string[]): string[] {
+  const keys: string[] = [];
+  for (const node of nodes) {
+    const isAncestor =
+      activePath.length > node.path.length &&
+      node.path.every((seg, i) => activePath[i] === seg);
+    if (isAncestor) {
+      keys.push(nodeKey(node));
+      keys.push(...ancestorKeys(node.children, activePath));
+    }
+  }
+  return keys;
+}
+
 /// Wiki는 카테고리가 있어서 다른 워크스페이스 항목과 다르게 트리를 아코디언으로
-/// 펼친다. 토글은 CategoryLink와 같은 방식 — /wiki 아래 있으면 기본으로 열리지만
-/// 그 뒤로는 사용자가 직접 접고 펼 수 있다. 본문은 별도 사이드바 없이 전체폭을 쓴다.
+/// 펼친다. 펼침 상태는 노드 경로 집합 하나로 관리한다 — Wiki 자체를 누르면
+/// 전체 트리를 한 번에 펼치거나 접어야 하는데, 각 노드가 따로 useState를 들고
+/// 있으면 부모가 자식들 상태에 손댈 방법이 없다.
 export function SidebarWikiItem() {
   const pathname = usePathname();
   const inWiki = pathname.startsWith("/wiki");
@@ -25,14 +48,27 @@ export function SidebarWikiItem() {
   const [openOverride, setOpenOverride] = useState<boolean | null>(null);
   const open = openOverride ?? inWiki;
 
-  useEffect(() => {
-    if (!open || tree) return;
-    void wikiTreeAction().then(setTree);
-  }, [open, tree]);
-
   const activePath = inWiki
     ? pathname.replace(/^\/wiki\/?/, "").split("/").filter(Boolean)
     : [];
+
+  const [openKeys, setOpenKeys] = useState<Set<string>>(new Set());
+  /// Wiki 링크를 눌러 트리가 아직 없는 상태에서도 "전체 펼치기"가 걸리도록,
+  /// fetch가 끝난 뒤 무엇으로 채울지를 미리 정해둔다.
+  const [pendingExpand, setPendingExpand] = useState(false);
+
+  useEffect(() => {
+    if (!open || tree) return;
+    void wikiTreeAction().then((t) => {
+      setTree(t);
+      setOpenKeys(
+        new Set(pendingExpand ? allKeys(t) : ancestorKeys(t, activePath)),
+      );
+    });
+    // activePath·pendingExpand는 트리를 처음 받아올 때 한 번만 초기값으로 쓰면
+    // 된다 — 이후 경로 이동은 아래 CategoryLink의 자체 네비게이션으로 처리됨.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, tree]);
 
   return (
     <div>
@@ -64,6 +100,11 @@ export function SidebarWikiItem() {
         <Link
           href="/wiki"
           aria-current={pathname === "/wiki" ? "page" : undefined}
+          onClick={() => {
+            setOpenOverride(true);
+            if (tree) setOpenKeys(new Set(allKeys(tree)));
+            else setPendingExpand(true);
+          }}
           className="flex flex-1 items-center gap-2.5 py-[7px] pl-0.5"
         >
           <svg
@@ -87,7 +128,14 @@ export function SidebarWikiItem() {
             </div>
           ) : (
             tree.map((node) => (
-              <CategoryLink key={node.name} node={node} activePath={activePath} depth={0} />
+              <CategoryLink
+                key={node.name}
+                node={node}
+                activePath={activePath}
+                depth={0}
+                openKeys={openKeys}
+                setOpenKeys={setOpenKeys}
+              />
             ))
           )}
         </div>
@@ -100,22 +148,31 @@ function CategoryLink({
   node,
   activePath,
   depth,
+  openKeys,
+  setOpenKeys,
 }: {
   node: WikiCategoryNode;
   activePath: string[];
   depth: number;
+  openKeys: Set<string>;
+  setOpenKeys: (fn: (prev: Set<string>) => Set<string>) => void;
 }) {
   const href = `/wiki/${node.path.map(encodeURIComponent).join("/")}`;
   const isExact =
     activePath.length === node.path.length &&
     node.path.every((seg, i) => activePath[i] === seg);
-  const isAncestor =
-    activePath.length > node.path.length &&
-    node.path.every((seg, i) => activePath[i] === seg);
   const hasChildren = node.children.length > 0;
+  const key = nodeKey(node);
+  const open = openKeys.has(key);
 
-  /// 현재 위치가 이 안에 있으면 열어서 보여주고, 아니면 접어서 시작한다.
-  const [open, setOpen] = useState(isExact || isAncestor);
+  function toggle() {
+    setOpenKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }
 
   return (
     <div>
@@ -130,7 +187,7 @@ function CategoryLink({
         {hasChildren ? (
           <button
             type="button"
-            onClick={() => setOpen((v) => !v)}
+            onClick={toggle}
             aria-expanded={open}
             aria-label={open ? `${node.name} 접기` : `${node.name} 펼치기`}
             className="grid size-[18px] shrink-0 cursor-pointer place-items-center text-text-3 hover:text-text"
@@ -169,6 +226,8 @@ function CategoryLink({
               node={child}
               activePath={activePath}
               depth={depth + 1}
+              openKeys={openKeys}
+              setOpenKeys={setOpenKeys}
             />
           ))}
         </div>
