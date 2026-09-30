@@ -1,18 +1,61 @@
-import { historySummary, searchHistory } from "@/lib/chats";
-import { HistoryRowCard } from "@/components/history-row";
-import { HistorySearch } from "@/components/history-search";
+import {
+  historySummary,
+  searchHistory,
+  type HistoryFilter,
+  type HistorySort,
+  type TurnStatus,
+} from "@/lib/chats";
+import { HistoryList } from "@/components/history-list";
+import { HistoryControls } from "@/components/history-controls";
+import { listMembers } from "@/lib/session";
+import { prisma } from "@/lib/db";
+import type { ChatType } from "@/lib/engine";
 
 export const dynamic = "force-dynamic";
+
+const SORTS: HistorySort[] = ["recent", "score", "duration"];
+const STATUSES: TurnStatus[] = [
+  "QUEUED",
+  "RUNNING",
+  "WAITING_INPUT",
+  "DONE",
+  "FAILED",
+  "CANCELED",
+];
+
+function one(v: string | string[] | undefined) {
+  return typeof v === "string" && v ? v : undefined;
+}
 
 export default async function HistoryPage({
   searchParams,
 }: PageProps<"/history">) {
-  const { q } = await searchParams;
-  const query = typeof q === "string" ? q : "";
+  const sp = await searchParams;
 
-  const [summary, rows] = await Promise.all([
+  const type = one(sp.type);
+  const status = one(sp.status);
+  const sort = one(sp.sort);
+  const scored = one(sp.scored);
+
+  const filter: HistoryFilter = {
+    query: one(sp.q),
+    memberId: one(sp.member),
+    type: (type as ChatType | undefined) ?? undefined,
+    status: STATUSES.includes(status as TurnStatus)
+      ? (status as TurnStatus)
+      : undefined,
+    from: one(sp.from) ? new Date(`${one(sp.from)}T00:00:00+09:00`) : undefined,
+    to: one(sp.to) ? new Date(`${one(sp.to)}T23:59:59+09:00`) : undefined,
+    scored: scored === "yes" ? true : scored === "no" ? false : undefined,
+    userId: one(sp.user),
+    sort: SORTS.includes(sort as HistorySort) ? (sort as HistorySort) : "recent",
+  };
+
+  const [summary, page, members, users] = await Promise.all([
     historySummary(),
-    searchHistory(query),
+    searchHistory(filter),
+    listMembers(),
+    prisma.user.findMany({ orderBy: { name: "asc" } }),
   ]);
 
   return (
@@ -43,21 +86,22 @@ export default async function HistoryPage({
         />
       </div>
 
-      <HistorySearch defaultValue={query} />
+      <HistoryControls
+        members={members}
+        users={users.map((u) => ({ id: u.id, name: u.name }))}
+        total={page.total}
+      />
 
-      {rows.length === 0 ? (
-        <p className="mt-6 text-[14.5px] text-text-3">
-          {query
-            ? `"${query}"에 해당하는 질의가 없습니다.`
-            : "아직 질의가 없습니다."}
-        </p>
-      ) : (
-        <div className="mt-4 flex flex-col gap-2.5">
-          {rows.map((row) => (
-            <HistoryRowCard key={row.id} row={row} />
-          ))}
-        </div>
-      )}
+      <HistoryList
+        key={new URLSearchParams(
+          Object.entries(sp).flatMap(([k, v]) =>
+            typeof v === "string" ? [[k, v] as [string, string]] : [],
+          ),
+        ).toString()}
+        initialRows={page.rows}
+        initialCursor={page.nextCursor}
+        query={filter.query ?? ""}
+      />
     </div>
   );
 }

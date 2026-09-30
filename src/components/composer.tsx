@@ -2,23 +2,48 @@
 
 import { useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { CHAT_TYPES, type ChatType } from "@/lib/engine";
+
+export type MemberOption = { id: string; name: string };
+
+const LAST_MEMBER_KEY = "lastMemberId";
 
 export function Composer({
   action,
   memberName,
+  members,
   hidden,
   placeholder = "SR 내용을 붙여넣으세요",
-  pickType,
 }: {
   action: (formData: FormData) => void;
-  memberName: string;
+  memberName?: string;
+  members?: MemberOption[];
   hidden?: Record<string, string | number>;
   placeholder?: string;
-  pickType?: boolean;
 }) {
-  const [type, setType] = useState<ChatType>("LOGIC_REVIEW");
-  const hint = CHAT_TYPES.find((t) => t.value === type)?.hint;
+  /// 마지막으로 쓴 회원사를 기본값으로. useState 초기화 함수는 브라우저에서만
+  /// 도는 첫 렌더에 한 번 불리므로 effect로 덮어쓸 필요가 없다.
+  const [memberId, setMemberId] = useState(() => {
+    const fallback = members?.[0]?.id ?? "";
+    if (typeof window === "undefined" || !members?.length) return fallback;
+    try {
+      const saved = localStorage.getItem(LAST_MEMBER_KEY);
+      return saved && members.some((m) => m.id === saved) ? saved : fallback;
+    } catch {
+      return fallback;
+    }
+  });
+
+  function pickMember(id: string) {
+    setMemberId(id);
+    try {
+      localStorage.setItem(LAST_MEMBER_KEY, id);
+    } catch {
+      /* 무시 */
+    }
+  }
+
+  const activeName =
+    members?.find((m) => m.id === memberId)?.name ?? memberName ?? "";
 
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-0 z-10 flex justify-center px-6 pt-4.5 pb-5.5 [background:linear-gradient(to_top,var(--bg)_60%,transparent)]">
@@ -31,34 +56,37 @@ export function Composer({
             <input key={k} type="hidden" name={k} value={v} />
           ))}
 
-        {pickType && (
+        {members && members.length > 0 && (
           <>
-            <input type="hidden" name="type" value={type} />
-            <div className="flex flex-wrap items-center gap-2 px-4 pt-3.5">
-              {CHAT_TYPES.map((t) => (
-                <button
-                  key={t.value}
-                  type="button"
-                  onClick={() => setType(t.value)}
-                  aria-pressed={type === t.value}
-                  className={
-                    type === t.value
-                      ? "cursor-pointer rounded-lg bg-accent-soft px-3 py-1.5 text-[12.5px] font-semibold text-accent-deep"
-                      : "cursor-pointer rounded-lg bg-surface-3 px-3 py-1.5 text-[12.5px] font-semibold text-text-2 hover:bg-line"
-                  }
-                >
-                  {t.label}
-                </button>
-              ))}
-              <span className="text-[12.5px] text-text-3">{hint}</span>
-            </div>
+            <input type="hidden" name="memberId" value={memberId} />
+            {members.length > 1 && (
+              <div className="flex flex-wrap items-center gap-2 px-4 pt-3.5">
+                {members.map((m) => (
+                  <button
+                    key={m.id}
+                    type="button"
+                    onClick={() => pickMember(m.id)}
+                    aria-pressed={memberId === m.id}
+                    className={
+                      memberId === m.id
+                        ? "cursor-pointer rounded-lg bg-accent-soft px-3 py-1.5 text-[12.5px] font-semibold text-accent-deep"
+                        : "cursor-pointer rounded-lg bg-surface-3 px-3 py-1.5 text-[12.5px] font-semibold text-text-2 hover:bg-line"
+                    }
+                  >
+                    {m.name}
+                  </button>
+                ))}
+              </div>
+            )}
           </>
         )}
 
         <Field placeholder={placeholder} />
         <div className="flex items-center gap-3 border-t border-line px-4 pt-2.5 pb-3">
           <span className="mr-auto text-[11.5px] text-text-3">
-            <span className="font-mono">{memberName}</span> · 읽기 전용 DB로 조회합니다
+            <span className="font-mono" suppressHydrationWarning>
+              {activeName}
+            </span> · 읽기 전용 DB로 조회합니다
           </span>
           <Submit />
         </div>

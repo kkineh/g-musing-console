@@ -1,9 +1,13 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, type Prisma } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+const DAY = 24 * 60 * 60 * 1000;
+const ago = (days: number) => new Date(Date.now() - days * DAY);
+
 async function main() {
   await prisma.chat.deleteMany();
+  await prisma.member.deleteMany();
 
   const [sangmin, jimin] = await Promise.all([
     prisma.user.upsert({
@@ -18,26 +22,18 @@ async function main() {
     }),
   ]);
 
-  await Promise.all([
-    prisma.member.upsert({
-      where: { id: "gist-v2" },
-      update: {},
-      create: { id: "gist-v2", name: "GIST V2" },
-    }),
-    prisma.member.upsert({
-      where: { id: "gist-v1" },
-      update: {},
-      create: { id: "gist-v1", name: "GIST V1" },
-    }),
-  ]);
+  await prisma.member.create({
+    data: { id: "hll", name: "한화라이프랩" },
+  });
 
-  await prisma.chat.create({
-    data: {
+  const chats: Prisma.ChatCreateInput[] = [
+    {
       type: "LOGIC_REVIEW",
       title: "지사수수료계 0원 산출 사유",
       sessionId: "seed-session-a",
-      memberId: "gist-v2",
-      userId: sangmin.id,
+      member: { connect: { id: "hll" } },
+      user: { connect: { id: sangmin.id } },
+      createdAt: ago(1),
       turns: {
         create: {
           seq: 1,
@@ -51,7 +47,7 @@ async function main() {
             { locator: "TB_SU_JISA_RATE", description: "대상 지사 등록 행 없음" },
           ]),
           trace: JSON.stringify([
-            { label: "유형 판별", detail: "로직 확인", elapsedMs: 400 },
+            { label: "유형 판별", detail: "로직 문의", elapsedMs: 400 },
             { label: "저장소 탐색", detail: "7개 파일", elapsedMs: 21700 },
             { label: "DB 조회", detail: "4건", elapsedMs: 31400 },
           ]),
@@ -59,7 +55,7 @@ async function main() {
           tokens: 38200,
           filesRead: 7,
           dbQueries: 4,
-          completedAt: new Date(),
+          completedAt: ago(1),
           score: {
             create: {
               pathAccuracy: 9,
@@ -74,15 +70,13 @@ async function main() {
         },
       },
     },
-  });
-
-  await prisma.chat.create({
-    data: {
+    {
       type: "LOGIC_REVIEW",
       title: "성과수수료 미산출 사유",
       sessionId: "seed-session-b",
-      memberId: "gist-v2",
-      userId: jimin.id,
+      member: { connect: { id: "hll" } },
+      user: { connect: { id: jimin.id } },
+      createdAt: ago(3),
       turns: {
         create: [
           {
@@ -111,7 +105,7 @@ async function main() {
               { locator: "PKG_SU_CALC:880", description: "성과 산출 대상 필터" },
             ]),
             trace: JSON.stringify([
-              { label: "유형 판별", detail: "로직 확인", elapsedMs: 400 },
+              { label: "유형 판별", detail: "로직 문의", elapsedMs: 400 },
               { label: "질문 분석", detail: "조회 화면 불명확", elapsedMs: 2400 },
               { label: "저장소 탐색", detail: "5개 파일", elapsedMs: 18600 },
               { label: "DB 조회", detail: "6건", elapsedMs: 27200 },
@@ -120,7 +114,7 @@ async function main() {
             dbQueries: 6,
             tokens: 41700,
             elapsedMs: 94000,
-            completedAt: new Date(),
+            completedAt: ago(3),
             score: {
               create: {
                 pathAccuracy: 8,
@@ -150,20 +144,18 @@ async function main() {
             dbQueries: 2,
             tokens: 12400,
             elapsedMs: 41000,
-            completedAt: new Date(),
+            completedAt: ago(3),
           },
         ],
       },
     },
-  });
-
-  await prisma.chat.create({
-    data: {
-      type: "LOGIC_REVIEW",
+    {
+      type: "ERROR_CAUSE",
       title: "모집수수료율 산출 기준",
       sessionId: "seed-session-c",
-      memberId: "gist-v1",
-      userId: sangmin.id,
+      member: { connect: { id: "hll" } },
+      user: { connect: { id: sangmin.id } },
+      createdAt: ago(5),
       turns: {
         create: {
           seq: 1,
@@ -181,13 +173,104 @@ async function main() {
             },
           ]),
           trace: JSON.stringify([
-            { label: "유형 판별", detail: "로직 확인", elapsedMs: 400 },
+            { label: "유형 판별", detail: "오류 원인 확인", elapsedMs: 400 },
             { label: "질문 분석", detail: "채널 구분 불명확", elapsedMs: 2600 },
           ]),
         },
       },
     },
-  });
+    {
+      type: "ERROR_CAUSE",
+      title: "시책금 반영 후 합계 불일치",
+      sessionId: "seed-session-d",
+      member: { connect: { id: "hll" } },
+      user: { connect: { id: jimin.id } },
+      createdAt: ago(9),
+      turns: {
+        create: {
+          seq: 1,
+          status: "FAILED",
+          question: "시책금을 반영했는데 합계가 안 맞습니다. 확인 부탁드립니다.",
+          error: "저장소 사본 최신화 실패: origin에 연결할 수 없습니다",
+          trace: JSON.stringify([
+            { label: "유형 판별", detail: "오류 원인 확인", elapsedMs: 400 },
+          ]),
+          elapsedMs: 3200,
+          completedAt: ago(9),
+        },
+      },
+    },
+    {
+      title: "해촉 설계사 수수료 환수 기준",
+      member: { connect: { id: "hll" } },
+      user: { connect: { id: sangmin.id } },
+      createdAt: ago(12),
+      turns: {
+        create: {
+          seq: 1,
+          status: "CANCELED",
+          question: "해촉된 설계사의 기지급 수수료 환수 기준이 어떻게 되나요?",
+          trace: JSON.stringify([
+            { label: "유형 판별", elapsedMs: 400 },
+          ]),
+          elapsedMs: 8100,
+          completedAt: ago(12),
+        },
+      },
+    },
+    {
+      type: "LOGIC_REVIEW",
+      title: "지점장수수료 조직육성지급율 합산",
+      sessionId: "seed-session-f",
+      member: { connect: { id: "hll" } },
+      user: { connect: { id: jimin.id } },
+      createdAt: ago(18),
+      turns: {
+        create: {
+          seq: 1,
+          status: "DONE",
+          question: "지점장수수료의 조직육성지급율 합산 기준이 궁금합니다.",
+          answer:
+            "조직육성지급율은 하위 조직의 실적 합계에 단계별 지급율을 곱해 합산합니다. 최대 560%까지 누적되며, 그 이상은 절사됩니다.",
+          references: JSON.stringify([
+            { locator: "PKG_SU_CALC:1120", description: "조직육성 합산 루프" },
+          ]),
+          trace: JSON.stringify([
+            { label: "유형 판별", detail: "로직 문의", elapsedMs: 400 },
+            { label: "저장소 탐색", detail: "5개 파일", elapsedMs: 15300 },
+          ]),
+          elapsedMs: 123000,
+          tokens: 44100,
+          filesRead: 5,
+          dbQueries: 6,
+          completedAt: ago(18),
+        },
+      },
+    },
+  ];
+
+  for (const data of chats) {
+    const chat = await prisma.chat.create({
+      data,
+      include: { turns: { orderBy: { seq: "asc" }, include: { score: true } } },
+    });
+
+    const averages = chat.turns
+      .map((t) => t.score?.average)
+      .filter((a): a is number => a !== undefined && a !== null);
+
+    await prisma.chat.update({
+      where: { id: chat.id },
+      data: {
+        lastStatus: chat.turns.at(-1)?.status ?? "QUEUED",
+        totalMs:
+          chat.turns.reduce((sum, t) => sum + (t.elapsedMs ?? 0), 0) || null,
+        scoreAvg: averages.length
+          ? averages.reduce((a, b) => a + b, 0) / averages.length
+          : null,
+      },
+    });
+  }
 
   const docs = [
     {

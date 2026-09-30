@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import { prisma } from "./db";
 import type {
   ChatType,
@@ -7,10 +8,18 @@ import type {
   TraceStep,
 } from "./engine";
 
+export type TurnStatus =
+  | "QUEUED"
+  | "RUNNING"
+  | "WAITING_INPUT"
+  | "DONE"
+  | "FAILED"
+  | "CANCELED";
+
 export type TurnView = {
   id: number;
   seq: number;
-  status: "QUEUED" | "RUNNING" | "WAITING_INPUT" | "DONE" | "FAILED";
+  status: TurnStatus;
   question: string;
   answer: string | null;
   references: Reference[];
@@ -27,7 +36,7 @@ export type TurnView = {
 
 export type ChatView = {
   id: number;
-  type: ChatType;
+  type: ChatType | null;
   title: string | null;
   memberId: string;
   memberName: string;
@@ -100,12 +109,14 @@ export async function listChats(limit = 30) {
 
 export type HistoryRow = {
   id: number;
+  type: ChatType | null;
   title: string;
+  memberId: string;
   memberName: string;
   userName: string;
   createdAt: Date;
   turnCount: number;
-  status: TurnView["status"];
+  status: TurnStatus;
   askedBack: boolean;
   answer: string | null;
   elapsedMs: number | null;
@@ -116,59 +127,114 @@ export type HistoryRow = {
   scoredBy: string | null;
 };
 
-export async function searchHistory(
-  query: string,
-  limit = 50,
-): Promise<HistoryRow[]> {
-  const q = query.trim();
+export type HistorySort = "recent" | "score" | "duration";
 
-  const chats = await prisma.chat.findMany({
-    where: q
-      ? {
-          OR: [
-            { title: { contains: q } },
-            { turns: { some: { question: { contains: q } } } },
-            { turns: { some: { answer: { contains: q } } } },
-          ],
-        }
-      : undefined,
-    orderBy: { createdAt: "desc" },
-    take: limit,
-    include: {
-      member: true,
-      user: true,
-      turns: {
-        orderBy: { seq: "asc" },
-        include: { score: { include: { scoredBy: true } } },
+export type HistoryFilter = {
+  query?: string;
+  memberId?: string;
+  type?: ChatType;
+  status?: TurnStatus;
+  from?: Date;
+  to?: Date;
+  scored?: boolean;
+  userId?: string;
+  sort?: HistorySort;
+  cursor?: number;
+  limit?: number;
+};
+
+export const HISTORY_PAGE_SIZE = 20;
+
+function historyWhere(f: HistoryFilter) {
+  const q = f.query?.trim();
+
+  return {
+    ...(q && {
+      OR: [
+        { title: { contains: q } },
+        { turns: { some: { question: { contains: q } } } },
+        { turns: { some: { answer: { contains: q } } } },
+      ],
+    }),
+    ...(f.memberId && { memberId: f.memberId }),
+    ...(f.type && { type: f.type }),
+    ...(f.status && { lastStatus: f.status }),
+    ...(f.userId && { userId: f.userId }),
+    ...(f.scored !== undefined && {
+      scoreAvg: f.scored ? { not: null } : null,
+    }),
+    ...((f.from || f.to) && {
+      createdAt: { ...(f.from && { gte: f.from }), ...(f.to && { lte: f.to }) },
+    }),
+  };
+}
+
+const SORT_ORDER: Record<HistorySort, Prisma.ChatOrderByWithRelationInput[]> = {
+  recent: [{ createdAt: "desc" }, { id: "desc" }],
+  score: [{ scoreAvg: { sort: "desc", nulls: "last" } }, { id: "desc" }],
+  duration: [{ totalMs: { sort: "desc", nulls: "last" } }, { id: "desc" }],
+};
+
+export async function searchHistory(filter: HistoryFilter = {}): Promise<{
+  rows: HistoryRow[];
+  total: number;
+  nextCursor: number | null;
+}> {
+  const take = filter.limit ?? HISTORY_PAGE_SIZE;
+  const where = historyWhere(filter);
+
+  const [total, chats] = await Promise.all([
+    prisma.chat.count({ where }),
+    prisma.chat.findMany({
+      where,
+      orderBy: SORT_ORDER[filter.sort ?? "recent"],
+      take: take + 1,
+      ...(filter.cursor && { cursor: { id: filter.cursor }, skip: 1 }),
+      include: {
+        member: true,
+        user: true,
+        turns: {
+          orderBy: { seq: "asc" },
+          include: { score: { include: { scoredBy: true } } },
+        },
       },
-    },
-  });
+    }),
+  ]);
 
-  return chats.map((chat) => {
-    const first = chat.turns[0];
-    const last = chat.turns.at(-1);
-    const scored = chat.turns.find((t) => t.score);
+  const hasMore = chats.length > take;
+  const page = hasMore ? chats.slice(0, take) : chats;
 
-    return {
-      id: chat.id,
-      title: chat.title ?? first?.question ?? "제목 없음",
-      memberName: chat.member.name,
-      userName: chat.user.name,
-      createdAt: chat.createdAt,
-      turnCount: chat.turns.length,
-      status: last?.status ?? "QUEUED",
-      askedBack: chat.turns.some(
-        (t) => t.pendingQuestions !== null || t.answeredInput !== null,
-      ),
-      answer: last?.answer ?? null,
-      elapsedMs: chat.turns.reduce((sum, t) => sum + (t.elapsedMs ?? 0), 0) || null,
-      filesRead: sumOrNull(chat.turns.map((t) => t.filesRead)),
-      dbQueries: sumOrNull(chat.turns.map((t) => t.dbQueries)),
-      tokens: sumOrNull(chat.turns.map((t) => t.tokens)),
-      average: scored?.score?.average ?? null,
-      scoredBy: scored?.score?.scoredBy.name ?? null,
-    };
-  });
+  return {
+    total,
+    nextCursor: hasMore ? page[page.length - 1].id : null,
+    rows: page.map((chat) => {
+      const first = chat.turns[0];
+      const last = chat.turns.at(-1);
+      const scored = chat.turns.find((t) => t.score);
+
+      return {
+        id: chat.id,
+        type: chat.type,
+        title: chat.title ?? first?.question ?? "제목 없음",
+        memberId: chat.memberId,
+        memberName: chat.member.name,
+        userName: chat.user.name,
+        createdAt: chat.createdAt,
+        turnCount: chat.turns.length,
+        status: chat.lastStatus,
+        askedBack: chat.turns.some(
+          (t) => t.pendingQuestions !== null || t.answeredInput !== null,
+        ),
+        answer: last?.answer ?? null,
+        elapsedMs: chat.totalMs,
+        filesRead: sumOrNull(chat.turns.map((t) => t.filesRead)),
+        dbQueries: sumOrNull(chat.turns.map((t) => t.dbQueries)),
+        tokens: sumOrNull(chat.turns.map((t) => t.tokens)),
+        average: chat.scoreAvg,
+        scoredBy: scored?.score?.scoredBy.name ?? null,
+      };
+    }),
+  };
 }
 
 function sumOrNull(values: (number | null)[]): number | null {
@@ -198,6 +264,31 @@ function daysAgo(days: number) {
   return new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 }
 
+/// Chat의 lastStatus·totalMs·scoreAvg를 턴에서 다시 계산한다.
+/// 턴 상태나 채점이 바뀐 뒤 반드시 부른다.
+export async function refreshChatRollup(chatId: number) {
+  const turns = await prisma.turn.findMany({
+    where: { chatId },
+    orderBy: { seq: "asc" },
+    select: { status: true, elapsedMs: true, score: { select: { average: true } } },
+  });
+
+  const averages = turns
+    .map((t) => t.score?.average)
+    .filter((a): a is number => a !== undefined && a !== null);
+
+  await prisma.chat.update({
+    where: { id: chatId },
+    data: {
+      lastStatus: turns.at(-1)?.status ?? "QUEUED",
+      totalMs: turns.reduce((sum, t) => sum + (t.elapsedMs ?? 0), 0) || null,
+      scoreAvg: averages.length
+        ? averages.reduce((a, b) => a + b, 0) / averages.length
+        : null,
+    },
+  });
+}
+
 export async function applyEngineResult(
   turnId: number,
   chatId: number,
@@ -219,12 +310,16 @@ export async function applyEngineResult(
         data: { sessionId: result.sessionId },
       });
     }
+    await refreshChatRollup(chatId);
     return;
   }
 
   await prisma.chat.update({
     where: { id: chatId },
-    data: { sessionId: result.sessionId },
+    data: {
+      sessionId: result.sessionId,
+      ...(result.type && { type: result.type }),
+    },
   });
 
   if (result.status === "waiting_input") {
@@ -237,6 +332,7 @@ export async function applyEngineResult(
         rawResult: JSON.stringify(result),
       },
     });
+    await refreshChatRollup(chatId);
     return;
   }
 
@@ -255,4 +351,5 @@ export async function applyEngineResult(
       completedAt: new Date(),
     },
   });
+  await refreshChatRollup(chatId);
 }

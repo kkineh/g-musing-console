@@ -1,14 +1,20 @@
 import type { TurnView } from "@/lib/chats";
+import { chatTypeLabel, type ChatType } from "@/lib/engine";
 import { formatDuration, formatTime } from "@/lib/format";
 import { AskBackForm } from "./ask-back-form";
 import { EvidenceMap } from "./evidence-map";
+import { LiveTurn } from "./live-turn";
 
 export function TurnCard({
   turn,
   userName,
+  chatId,
+  chatType,
 }: {
   turn: TurnView;
   userName: string;
+  chatId: number;
+  chatType: ChatType | null;
 }) {
   return (
     <div className="flex flex-col gap-4.5">
@@ -18,7 +24,7 @@ export function TurnCard({
           who={userName}
           meta={
             <>
-              <Pill>로직 확인</Pill>
+              <Pill>{chatTypeLabel(chatType)}</Pill>
               <Pill plain>{formatTime(turn.createdAt)}</Pill>
             </>
           }
@@ -51,14 +57,18 @@ export function TurnCard({
         <div className="px-6 py-5">
           {turn.trace.length > 0 && <Trace turn={turn} />}
 
-          {turn.status === "RUNNING" && (
-            <p className="text-[15px] text-text-3">엔진이 처리하고 있습니다…</p>
+          {(turn.status === "RUNNING" || turn.status === "QUEUED") && (
+            <LiveTurn turnId={turn.id} chatId={chatId} />
           )}
 
           {turn.status === "FAILED" && (
             <div className="rounded-xl bg-danger-soft px-4 py-3.5 text-sm text-danger">
               {turn.error ?? "처리에 실패했습니다"}
             </div>
+          )}
+
+          {turn.status === "CANCELED" && (
+            <p className="text-[15px] text-text-3">취소된 질의입니다.</p>
           )}
 
           {turn.status === "WAITING_INPUT" && (

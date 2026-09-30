@@ -2,18 +2,13 @@ import Link from "next/link";
 import { askAction } from "./actions";
 import { Composer } from "@/components/composer";
 import { listChats } from "@/lib/chats";
-import { prisma } from "@/lib/db";
-import { defaultMember } from "@/lib/session";
+import { listMembers } from "@/lib/session";
 import { chatNo } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
 export default async function AskPage() {
-  const memberId = await defaultMember();
-  const [member, recent] = await Promise.all([
-    prisma.member.findUniqueOrThrow({ where: { id: memberId } }),
-    listChats(5),
-  ]);
+  const [members, recent] = await Promise.all([listMembers(), listChats(10)]);
 
   return (
     <div className="mx-auto max-w-[760px]">
@@ -26,7 +21,7 @@ export default async function AskPage() {
         </p>
       </div>
 
-      <Composer action={askAction} memberName={member.name} />
+      <Composer action={askAction} members={members} />
 
       {recent.length > 0 && (
         <div className="mt-10">

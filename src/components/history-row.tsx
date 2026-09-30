@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import type { HistoryRow } from "@/lib/chats";
+import { chatTypeLabel } from "@/lib/engine";
 import { chatNo, formatDateTime, formatDuration } from "@/lib/format";
 
 const STATUS_LABEL: Record<HistoryRow["status"], string> = {
@@ -11,9 +12,16 @@ const STATUS_LABEL: Record<HistoryRow["status"], string> = {
   WAITING_INPUT: "답변 대기",
   DONE: "완료",
   FAILED: "실패",
+  CANCELED: "취소",
 };
 
-export function HistoryRowCard({ row }: { row: HistoryRow }) {
+export function HistoryRowCard({
+  row,
+  highlight = "",
+}: {
+  row: HistoryRow;
+  highlight?: string;
+}) {
   const [open, setOpen] = useState(false);
 
   const stats = [
@@ -29,7 +37,7 @@ export function HistoryRowCard({ row }: { row: HistoryRow }) {
         <span className="font-mono text-[13px] text-text-3">
           {chatNo(row.id)}
         </span>
-        <Tag>로직 확인</Tag>
+        <Tag>{chatTypeLabel(row.type)}</Tag>
         <Tag>{row.memberName}</Tag>
         {row.askedBack && <Tag accent>되묻기</Tag>}
         {row.turnCount > 1 && <Tag>{row.turnCount}턴</Tag>}
@@ -55,7 +63,7 @@ export function HistoryRowCard({ row }: { row: HistoryRow }) {
           href={`/c/${row.id}`}
           className="line-clamp-1 flex-1 text-[15px] leading-[1.55] text-text hover:text-accent"
         >
-          {row.title}
+          <Highlight text={row.title} needle={highlight} />
         </Link>
         <button
           type="button"
@@ -88,7 +96,7 @@ export function HistoryRowCard({ row }: { row: HistoryRow }) {
         <div className="mt-3.5 border-t border-line-soft pt-3.5">
           {row.answer ? (
             <p className="line-clamp-3 text-sm leading-[1.7] text-text-2">
-              {row.answer}
+              <Highlight text={excerpt(row.answer, highlight)} needle={highlight} />
             </p>
           ) : (
             <p className="text-sm text-text-3">아직 답변이 없습니다.</p>
@@ -171,3 +179,43 @@ function Score({ value }: { value: number }) {
   );
 }
 
+
+/// 검색어가 답변 뒤쪽에 있으면 앞 3줄만 잘라선 안 보인다. 매칭 지점 주변을 꺼낸다.
+function excerpt(text: string, needle: string, radius = 90) {
+  if (!needle) return text;
+  const at = text.toLowerCase().indexOf(needle.toLowerCase());
+  if (at < 0) return text;
+
+  const start = Math.max(0, at - radius);
+  const end = Math.min(text.length, at + needle.length + radius);
+  return `${start > 0 ? "…" : ""}${text.slice(start, end)}${end < text.length ? "…" : ""}`;
+}
+
+function Highlight({ text, needle }: { text: string; needle: string }) {
+  const term = needle.trim();
+  if (!term) return <>{text}</>;
+
+  const lower = text.toLowerCase();
+  const target = term.toLowerCase();
+  const parts: React.ReactNode[] = [];
+  let at = 0;
+
+  for (;;) {
+    const found = lower.indexOf(target, at);
+    if (found < 0) break;
+    if (found > at) parts.push(text.slice(at, found));
+    parts.push(
+      <mark
+        key={found}
+        className="rounded-[3px] bg-accent-soft px-0.5 text-accent-deep"
+      >
+        {text.slice(found, found + term.length)}
+      </mark>,
+    );
+    at = found + term.length;
+  }
+
+  if (at === 0) return <>{text}</>;
+  if (at < text.length) parts.push(text.slice(at));
+  return <>{parts}</>;
+}

@@ -27,8 +27,10 @@ model User {
 }
 
 model Chat {
-  id    Int      @id @default(autoincrement())
-  type  ChatType
+  id Int @id @default(autoincrement())
+
+  /// 엔진이 판별해 돌려준다. 응답 전에는 비어 있다.
+  type  ChatType?
   title String?
 
   /// 엔진 세션 파일은 엔진 쪽 디스크에 있어 이 값만으로 재개가 보장되지 않는다.
@@ -42,17 +44,31 @@ model Chat {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  /// 아래 셋은 턴에서 끌어올린 값이다. 이력 목록이 정렬·필터에 쓰는데
+  /// 턴을 전부 읽어 합산하면 목록 한 장에 대화 수만큼 집계가 돌기 때문.
+  /// applyEngineResult / 채점 저장에서 같이 갱신한다.
+  lastStatus  TurnStatus @default(QUEUED)
+  totalMs     Int?
+  scoreAvg    Float?
+
   turns Turn[]
 
   @@index([createdAt])
   @@index([type])
   @@index([memberId])
+  @@index([lastStatus])
+  @@index([scoreAvg])
+  @@index([totalMs])
 }
 
 model Turn {
   id     Int        @id @default(autoincrement())
   seq    Int
   status TurnStatus @default(QUEUED)
+
+  /// 콘솔이 만든다. 엔진 sessionId는 첫 응답 후에야 생기므로 그 전 취소와
+  /// 접점 재시도(팀즈 15초) 중복 차단은 이 값으로 한다.
+  requestId String @unique @default(cuid())
 
   question String
   answer   String?
@@ -128,4 +144,5 @@ enum TurnStatus {
   WAITING_INPUT
   DONE
   FAILED
+  CANCELED
 }
