@@ -22,8 +22,10 @@ model User {
   role      String   @default("operator")
   createdAt DateTime @default(now())
 
-  chats  Chat[]
-  scores Score[]
+  chats     Chat[]
+  scores    Score[]
+  revisions WikiRevision[]
+  auditLogs AuditLog[]
 }
 
 model Chat {
@@ -98,14 +100,16 @@ model Turn {
   @@index([status])
 }
 
+/// 항목은 evaluation-draft.md 기준. 유형에 따라 의미가 없는 항목이 있어
+/// null("해당 없음")을 저장할 수 있다. average는 매긴 항목만으로 낸다.
 model Score {
   id Int @id @default(autoincrement())
 
-  pathAccuracy    Int
-  scopeMatch      Int
-  convention      Int
-  contentAccuracy Int
-  askBackSafety   Int
+  pathAccuracy    Int?
+  scopeMatch      Int?
+  convention      Int?
+  contentAccuracy Int?
+  askBackSafety   Int?
   average Float
   note    String?
 
@@ -116,6 +120,7 @@ model Score {
   scoredBy   User   @relation(fields: [scoredById], references: [id])
 
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([createdAt])
 }
@@ -130,7 +135,44 @@ model WikiDoc {
   updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
 
+  revisions WikiRevision[]
+
   @@index([category])
+}
+
+/// 편집 전 내용을 통째로 남긴다. 되돌리기는 이 행을 다시 본문으로 쓰는 것.
+model WikiRevision {
+  id Int @id @default(autoincrement())
+
+  docId String
+  doc   WikiDoc @relation(fields: [docId], references: [id], onDelete: Cascade)
+
+  title    String
+  category String
+  body     String
+
+  editedById String
+  editedBy   User   @relation(fields: [editedById], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([docId, createdAt])
+}
+
+/// 계정·회원사처럼 사람이 바꾼 것을 남긴다. 질의 처리는 Turn에 남으므로 여기 안 넣는다.
+model AuditLog {
+  id Int @id @default(autoincrement())
+
+  actorId String
+  actor   User   @relation(fields: [actorId], references: [id])
+
+  action String
+  target String
+  detail String?
+
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
 }
 
 enum ChatType {

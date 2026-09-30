@@ -4,6 +4,7 @@ import { formatDuration, formatTime } from "@/lib/format";
 import { AskBackForm } from "./ask-back-form";
 import { EvidenceMap } from "./evidence-map";
 import { LiveTurn } from "./live-turn";
+import { ScorePanel } from "./score-panel";
 
 export function TurnCard({
   turn,
@@ -108,6 +109,10 @@ export function TurnCard({
           )}
 
           {turn.status === "DONE" && <Usage turn={turn} />}
+
+          {turn.status === "DONE" && (
+            <ScorePanel turnId={turn.id} chatId={chatId} score={turn.score} />
+          )}
         </div>
       </section>
     </div>

@@ -1,7 +1,14 @@
 import { notFound } from "next/navigation";
 import { WikiDocView } from "@/components/wiki-doc";
 import { WikiDocList } from "@/components/wiki-doc-list";
-import { categoryDocs, findCategoryNode, getWikiDoc } from "@/lib/wiki";
+import {
+  allDocRefs,
+  categoryDocs,
+  docRevisions,
+  findCategoryNode,
+  getWikiDoc,
+} from "@/lib/wiki";
+import { WikiEditor } from "@/components/wiki-editor";
 
 export const dynamic = "force-dynamic";
 
@@ -17,14 +24,29 @@ export default async function WikiPathPage({
   // 마지막 세그먼트가 문서 slug인지 먼저 확인
   const doc = await getWikiDoc(lastSegment);
   if (doc && doc.category === categoryPath.join("/")) {
+    const [revisions, refs] = await Promise.all([
+      docRevisions(doc.slug),
+      allDocRefs(),
+    ]);
+
     return (
-      <WikiDocView
-        category={doc.category}
-        title={doc.title}
-        author={doc.author}
-        body={doc.body}
-        createdAt={doc.createdAt}
-      />
+      <div>
+        <WikiDocView
+          category={doc.category}
+          title={doc.title}
+          author={doc.author}
+          body={doc.body}
+          createdAt={doc.createdAt}
+        />
+        <WikiEditor
+          slug={doc.slug}
+          title={doc.title}
+          category={doc.category}
+          body={doc.body}
+          categories={[...new Set(refs.map((r) => r.category))].sort()}
+          revisions={revisions}
+        />
+      </div>
     );
   }
 

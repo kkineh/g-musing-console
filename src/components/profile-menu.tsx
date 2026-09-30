@@ -4,9 +4,10 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 const ITEMS = [
-  { href: "/admin/members", label: "회원사 관리" },
+  { href: "/settings", label: "내 설정" },
+  { href: "/score", label: "채점 대기" },
   { href: "/admin/users", label: "계정 관리" },
-  { href: "/settings", label: "설정" },
+  { href: "/admin/members", label: "회원사 관리" },
 ];
 
 export function ProfileMenu() {

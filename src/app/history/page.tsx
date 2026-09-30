@@ -8,6 +8,9 @@ import {
 import { HistoryList } from "@/components/history-list";
 import { HistoryControls } from "@/components/history-controls";
 import { listMembers } from "@/lib/session";
+import { lowScored, scoreStats } from "@/lib/scores";
+import { ScoreStats } from "@/components/score-stats";
+import Link from "next/link";
 import { prisma } from "@/lib/db";
 import type { ChatType } from "@/lib/engine";
 
@@ -51,11 +54,13 @@ export default async function HistoryPage({
     sort: SORTS.includes(sort as HistorySort) ? (sort as HistorySort) : "recent",
   };
 
-  const [summary, page, members, users] = await Promise.all([
+  const [summary, page, members, users, stats, low] = await Promise.all([
     historySummary(),
     searchHistory(filter),
     listMembers(),
     prisma.user.findMany({ orderBy: { name: "asc" } }),
+    scoreStats(),
+    lowScored(),
   ]);
 
   return (
@@ -78,13 +83,17 @@ export default async function HistoryPage({
           accent
         />
         <SummaryCard label="최근 7일" value={summary.weekCount} note="질의 건수" />
-        <SummaryCard
-          label="채점 대기"
-          value={summary.unscored}
-          note="완료된 턴 중"
-          alert={summary.unscored > 0}
-        />
+        <Link href="/score" className="block">
+          <SummaryCard
+            label="채점 대기"
+            value={summary.unscored}
+            note={summary.unscored > 0 ? "채점하러 가기 →" : "완료된 턴 중"}
+            alert={summary.unscored > 0}
+          />
+        </Link>
       </div>
+
+      <ScoreStats stats={stats} low={low} />
 
       <HistoryControls
         members={members}

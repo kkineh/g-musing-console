@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { WikiDocRef } from "@/lib/wiki";
+import type { WikiDocRef, WikiSearchHit } from "@/lib/wiki";
+import { searchWikiAction } from "@/app/wiki/actions";
 
 function docHref(doc: WikiDocRef) {
   const segments = doc.category.split("/").filter(Boolean).map(encodeURIComponent);
@@ -67,15 +68,34 @@ function WikiSearchDialog({
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-  const results = useMemo(() => {
-    const needle = query.trim().toLowerCase();
-    if (!needle) return docs;
-    return docs.filter(
-      (d) =>
-        d.title.toLowerCase().includes(needle) ||
-        d.category.toLowerCase().includes(needle),
-    );
-  }, [docs, query]);
+  /// { 검색어: 결과 }로 들고 있으면 검색어가 비었을 때 지우지 않아도 된다.
+  const [hits, setHits] = useState<{ q: string; found: WikiSearchHit[] }>({
+    q: "",
+    found: [],
+  });
+
+  /// 제목만 거르면 본문에 있는 말로 못 찾는다. 서버에서 본문까지 뒤진다.
+  useEffect(() => {
+    const needle = query.trim();
+    if (!needle) return;
+
+    let live = true;
+    const timer = setTimeout(() => {
+      void searchWikiAction(needle).then((found) => {
+        if (live) setHits({ q: needle, found });
+      });
+    }, 180);
+    return () => {
+      live = false;
+      clearTimeout(timer);
+    };
+  }, [query]);
+
+  const needle = query.trim();
+  const results: (WikiDocRef & { excerpt?: string })[] = useMemo(
+    () => (!needle ? docs : hits.q === needle ? hits.found : []),
+    [needle, docs, hits],
+  );
 
   if (query !== lastQuery) {
     setLastQuery(query);
@@ -135,7 +155,7 @@ function WikiSearchDialog({
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="문서 제목, 카테고리 검색"
+            placeholder="제목과 본문 검색"
             className="flex-1 bg-transparent text-[14.5px] text-text outline-none placeholder:text-text-3"
           />
           <kbd className="rounded border border-line px-1.5 py-0.5 font-mono text-[10.5px] text-text-3">
@@ -157,12 +177,23 @@ function WikiSearchDialog({
                 onMouseEnter={() => setActiveIndex(i)}
                 className={
                   i === activeIndex
-                    ? "flex items-center justify-between rounded-lg bg-accent-soft px-3 py-2.5 text-accent-deep"
-                    : "flex items-center justify-between rounded-lg px-3 py-2.5 text-text-2 hover:bg-surface-2"
+                    ? "flex items-start justify-between rounded-lg bg-accent-soft px-3 py-2.5 text-accent-deep"
+                    : "flex items-start justify-between rounded-lg px-3 py-2.5 text-text-2 hover:bg-surface-2"
                 }
               >
-                <span className="text-[14px] font-medium">{doc.title}</span>
-                <span className="text-[12px] text-text-3">{doc.category}</span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[14px] font-medium">
+                    {doc.title}
+                  </span>
+                  {doc.excerpt && (
+                    <span className="mt-0.5 line-clamp-1 block text-[12px] text-text-3">
+                      {doc.excerpt}
+                    </span>
+                  )}
+                </span>
+                <span className="ml-3 shrink-0 text-[12px] text-text-3">
+                  {doc.category}
+                </span>
               </Link>
             ))
           )}

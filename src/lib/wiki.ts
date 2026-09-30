@@ -104,17 +104,110 @@ export async function findCategoryNode(
   return node;
 }
 
-export async function searchWikiDocs(query: string) {
+export type WikiSearchHit = {
+  slug: string;
+  title: string;
+  category: string;
+  excerpt: string;
+};
+
+/// 본문에서 찾았으면 매칭 주변을 잘라서 같이 준다. 제목만 보여주면
+/// 왜 걸렸는지 알 수 없다.
+export async function searchWikiDocs(query: string): Promise<WikiSearchHit[]> {
   const needle = query.trim();
   if (!needle) return [];
-  return prisma.wikiDoc.findMany({
+
+  const docs = await prisma.wikiDoc.findMany({
     where: {
       OR: [{ title: { contains: needle } }, { body: { contains: needle } }],
     },
-    select: { slug: true, title: true, category: true },
+    select: { slug: true, title: true, category: true, body: true },
     orderBy: [{ category: "asc" }, { title: "asc" }],
     take: 20,
   });
+
+  return docs.map(({ body, ...doc }) => ({
+    ...doc,
+    excerpt: excerptAround(body, needle),
+  }));
+}
+
+function excerptAround(body: string, needle: string, radius = 70) {
+  const flat = body.replace(/[#*`>|\n]+/g, " ").replace(/\s+/g, " ").trim();
+  const at = flat.toLowerCase().indexOf(needle.toLowerCase());
+  if (at < 0) return flat.slice(0, radius * 2);
+
+  const start = Math.max(0, at - radius);
+  const end = Math.min(flat.length, at + needle.length + radius);
+  return `${start > 0 ? "…" : ""}${flat.slice(start, end)}${end < flat.length ? "…" : ""}`;
+}
+
+export async function saveWikiDoc(
+  slug: string,
+  editedById: string,
+  next: { title: string; category: string; body: string },
+) {
+  const doc = await prisma.wikiDoc.findUnique({ where: { slug } });
+  if (!doc) return null;
+
+  /// 고치기 전 내용을 먼저 남긴다.
+  await prisma.wikiRevision.create({
+    data: {
+      docId: doc.id,
+      title: doc.title,
+      category: doc.category,
+      body: doc.body,
+      editedById,
+    },
+  });
+
+  return prisma.wikiDoc.update({
+    where: { slug },
+    data: { title: next.title, category: next.category, body: next.body },
+  });
+}
+
+export async function docRevisions(slug: string) {
+  const doc = await prisma.wikiDoc.findUnique({ where: { slug } });
+  if (!doc) return [];
+
+  return prisma.wikiRevision.findMany({
+    where: { docId: doc.id },
+    orderBy: { createdAt: "desc" },
+    include: { editedBy: { select: { name: true } } },
+  });
+}
+
+export async function restoreRevision(revisionId: number, editedById: string) {
+  const revision = await prisma.wikiRevision.findUnique({
+    where: { id: revisionId },
+    include: { doc: true },
+  });
+  if (!revision) return null;
+
+  return saveWikiDoc(revision.doc.slug, editedById, {
+    title: revision.title,
+    category: revision.category,
+    body: revision.body,
+  });
+}
+
+export async function wikiOverview() {
+  const [docCount, categories, recent] = await Promise.all([
+    prisma.wikiDoc.count(),
+    prisma.wikiDoc.findMany({ select: { category: true }, distinct: ["category"] }),
+    prisma.wikiDoc.findMany({
+      orderBy: { updatedAt: "desc" },
+      take: 5,
+      select: { slug: true, title: true, category: true, author: true, updatedAt: true },
+    }),
+  ]);
+
+  return {
+    docCount,
+    categoryCount: new Set(categories.map((c) => c.category.split("/")[0])).size,
+    recent,
+  };
 }
 
 export async function allDocRefs(): Promise<WikiDocRef[]> {

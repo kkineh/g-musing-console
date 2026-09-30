@@ -244,6 +244,18 @@ async function main() {
           filesRead: 5,
           dbQueries: 6,
           completedAt: ago(18),
+          score: {
+            create: {
+              pathAccuracy: 10,
+              scopeMatch: 9,
+              convention: null,
+              contentAccuracy: 10,
+              askBackSafety: null,
+              average: 9.67,
+              note: "소스를 안 건드려서 컨벤션은 해당 없음. 되물을 지점도 없었음",
+              scoredById: sangmin.id,
+            },
+          },
         },
       },
     },

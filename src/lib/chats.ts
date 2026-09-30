@@ -32,6 +32,16 @@ export type TurnView = {
   dbQueries: number | null;
   error: string | null;
   createdAt: Date;
+  score: {
+    pathAccuracy: number | null;
+    scopeMatch: number | null;
+    convention: number | null;
+    contentAccuracy: number | null;
+    askBackSafety: number | null;
+    note: string | null;
+    average: number;
+    scoredBy: string;
+  } | null;
 };
 
 export type ChatView = {
@@ -60,7 +70,10 @@ export async function getChat(id: number): Promise<ChatView | null> {
     include: {
       member: true,
       user: true,
-      turns: { orderBy: { seq: "asc" } },
+      turns: {
+        orderBy: { seq: "asc" },
+        include: { score: { include: { scoredBy: true } } },
+      },
     },
   });
   if (!chat) return null;
@@ -92,6 +105,18 @@ export async function getChat(id: number): Promise<ChatView | null> {
       dbQueries: t.dbQueries,
       error: t.error,
       createdAt: t.createdAt,
+      score: t.score
+        ? {
+            pathAccuracy: t.score.pathAccuracy,
+            scopeMatch: t.score.scopeMatch,
+            convention: t.score.convention,
+            contentAccuracy: t.score.contentAccuracy,
+            askBackSafety: t.score.askBackSafety,
+            note: t.score.note,
+            average: t.score.average,
+            scoredBy: t.score.scoredBy.name,
+          }
+        : null,
     })),
   };
 }
