@@ -207,7 +207,7 @@ async function mockEngine(
       ]
     : [
         { label: "유형 판별", detail: chatTypeLabel(type), elapsedMs: 400 },
-        { label: "지식베이스 라우팅", detail: "수수료 파이프라인", elapsedMs: 1100 },
+        { label: "위키 라우팅", detail: "수수료 파이프라인", elapsedMs: 1100 },
         { label: "저장소 탐색", detail: "7개 파일", elapsedMs: 21700 },
         { label: "DB 조회", detail: "4건", elapsedMs: 31400 },
         { label: "응답 작성", elapsedMs: 52800 },
