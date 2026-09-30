@@ -1,18 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import {
-  restoreRevision,
-  saveWikiDoc,
-  searchWikiDocs,
-  type WikiSearchHit,
-} from "@/lib/wiki";
+import { restoreRevision, saveWikiDoc } from "@/lib/wiki";
 import { recordAudit } from "@/lib/admin";
 import { currentUser } from "@/lib/session";
-
-export async function searchWikiAction(query: string): Promise<WikiSearchHit[]> {
-  return searchWikiDocs(query);
-}
 
 export async function saveDocAction(formData: FormData) {
   const slug = String(formData.get("slug") ?? "");

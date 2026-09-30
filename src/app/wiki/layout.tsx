@@ -1,11 +1,6 @@
-import { WikiNav } from "@/components/wiki-nav";
-import { allDocRefs, categoryTree } from "@/lib/wiki";
-
 export const dynamic = "force-dynamic";
 
-export default async function WikiLayout({ children }: LayoutProps<"/wiki">) {
-  const [tree, docs] = await Promise.all([categoryTree(), allDocRefs()]);
-
+export default function WikiLayout({ children }: LayoutProps<"/wiki">) {
   return (
     <div>
       <div className="mb-6">
@@ -17,10 +12,7 @@ export default async function WikiLayout({ children }: LayoutProps<"/wiki">) {
         </p>
       </div>
 
-      <div className="grid items-start gap-7 lg:grid-cols-[232px_minmax(0,1fr)]">
-        <WikiNav tree={tree} docs={docs} />
-        {children}
-      </div>
+      {children}
     </div>
   );
 }

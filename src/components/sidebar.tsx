@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { SidebarWikiItem } from "./sidebar-wiki-item";
 import { ThemeToggle } from "./theme-toggle";
 
 const WORKSPACE = [
@@ -20,16 +21,6 @@ const WORKSPACE = [
       <>
         <circle cx="8" cy="8" r="6" />
         <path d="M8 4.5V8l2.6 1.6" />
-      </>
-    ),
-  },
-  {
-    href: "/wiki",
-    label: "지식베이스",
-    icon: (
-      <>
-        <path d="M3 2.8h6.5L13 6.3V13a.7.7 0 01-.7.7H3.7a.7.7 0 01-.7-.7V2.8z" />
-        <path d="M9.3 2.8V6h3.4M5.5 8.7h5M5.5 11h5" />
       </>
     ),
   },
@@ -100,7 +91,13 @@ export function Sidebar() {
       </Link>
 
       <nav className="flex-1 overflow-y-auto px-3 py-4">
-        <NavGroup label="워크스페이스" items={WORKSPACE} pathname={pathname} />
+        <div>
+          <div className="mb-1.5 px-2.5 text-[10.5px] font-bold tracking-[0.05em] text-text-3 uppercase">
+            워크스페이스
+          </div>
+          <NavItems items={WORKSPACE} pathname={pathname} />
+          <SidebarWikiItem />
+        </div>
         <div className="mt-5">
           <NavGroup label="관리" items={ADMIN} pathname={pathname} />
         </div>
@@ -127,6 +124,20 @@ function NavGroup({
       <div className="mb-1.5 px-2.5 text-[10.5px] font-bold tracking-[0.05em] text-text-3 uppercase">
         {label}
       </div>
+      <NavItems items={items} pathname={pathname} />
+    </div>
+  );
+}
+
+function NavItems({
+  items,
+  pathname,
+}: {
+  items: { href: string; label: string; icon: React.ReactNode }[];
+  pathname: string;
+}) {
+  return (
+    <>
       {items.map((item) => {
         const active = isActive(pathname, item.href);
         return (
@@ -153,6 +164,6 @@ function NavGroup({
           </Link>
         );
       })}
-    </div>
+    </>
   );
 }

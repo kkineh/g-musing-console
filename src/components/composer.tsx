@@ -46,7 +46,7 @@ export function Composer({
     members?.find((m) => m.id === memberId)?.name ?? memberName ?? "";
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-10 flex justify-center px-6 pt-4.5 pb-5.5 [background:linear-gradient(to_top,var(--bg)_60%,transparent)]">
+    <div className="pointer-events-none fixed right-0 bottom-0 left-[236px] z-10 flex justify-center px-6 pt-4.5 pb-5.5 [background:linear-gradient(to_top,var(--bg)_60%,transparent)]">
       <form
         action={action}
         className="pointer-events-auto w-full max-w-[820px] rounded-2xl border border-line bg-surface shadow-card-lg"
