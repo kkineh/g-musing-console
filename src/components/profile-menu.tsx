@@ -3,13 +3,6 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
-const ITEMS = [
-  { href: "/settings", label: "내 설정" },
-  { href: "/score", label: "채점 대기" },
-  { href: "/admin/users", label: "계정 관리" },
-  { href: "/admin/members", label: "회원사 관리" },
-];
-
 export function ProfileMenu() {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -37,7 +30,7 @@ export function ProfileMenu() {
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="menu"
         aria-expanded={open}
-        className="grid size-[26px] place-items-center rounded-lg bg-text text-[11px] font-bold text-surface"
+        className="grid size-[26px] cursor-pointer place-items-center rounded-lg bg-text text-[11px] font-bold text-surface"
       >
         한
       </button>
@@ -45,24 +38,21 @@ export function ProfileMenu() {
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-[38px] w-[190px] rounded-xl border border-line bg-surface p-1.5 shadow-card-lg"
+          className="absolute top-[34px] right-0 w-[180px] rounded-xl border border-line bg-surface p-1.5 shadow-card-lg"
         >
           <div className="px-3 py-2">
             <div className="text-sm font-semibold">한상민</div>
             <div className="text-[12.5px] text-text-3">관리자</div>
           </div>
           <div className="my-1 h-px bg-line-soft" />
-          {ITEMS.map((item) => (
-            <Link
-              key={item.href}
-              role="menuitem"
-              href={item.href}
-              onClick={() => setOpen(false)}
-              className="block rounded-lg px-3 py-2 text-sm text-text-2 hover:bg-surface-2 hover:text-text"
-            >
-              {item.label}
-            </Link>
-          ))}
+          <Link
+            role="menuitem"
+            href="/settings"
+            onClick={() => setOpen(false)}
+            className="block rounded-lg px-3 py-2 text-sm text-text-2 hover:bg-surface-2 hover:text-text"
+          >
+            마이페이지
+          </Link>
         </div>
       )}
     </div>
