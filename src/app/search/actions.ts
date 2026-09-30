@@ -10,7 +10,7 @@ export type GlobalSearchResult = {
   docs: { href: string; title: string; sub: string; excerpt: string }[];
 };
 
-/// 헤더 검색 하나로 이력과 위키를 같이 뒤진다.
+/// 헤더 검색 하나로 이력과 Wiki를 같이 뒤진다.
 export async function globalSearchAction(
   query: string,
 ): Promise<GlobalSearchResult> {

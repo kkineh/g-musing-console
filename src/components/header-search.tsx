@@ -116,7 +116,7 @@ function SearchDialog({ onClose }: { onClose: () => void }) {
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="처리 이력, 위키 검색"
+            placeholder="처리 이력, Wiki 검색"
             className="flex-1 bg-transparent text-[14.5px] text-text outline-none placeholder:text-text-3"
           />
           <kbd className="rounded border border-line px-1.5 py-0.5 font-mono text-[10.5px] text-text-3">
@@ -162,7 +162,7 @@ function SearchDialog({ onClose }: { onClose: () => void }) {
               )}
 
               {data.docs.length > 0 && (
-                <ResultGroup label="위키">
+                <ResultGroup label="Wiki">
                   {data.docs.map((d) => (
                     <Link
                       key={d.href}
