@@ -15,7 +15,9 @@ export function chatTypeLabel(type: ChatType | null) {
 export type EngineRequest = {
   /// 콘솔이 만든다. 취소와 재시도 중복 차단에 쓴다.
   requestId: string;
-  memberId: string;
+  /// 회원사를 특정하지 않는 공통 이슈 문의가 있어 선택값이다. 없으면 엔진이
+  /// 특정 회원사 저장소·DB에 매이지 않고 일반 수수료 로직으로 답한다.
+  memberId?: string;
   question: string;
   sessionId?: string;
   answers?: Record<string, string>;

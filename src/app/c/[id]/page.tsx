@@ -29,7 +29,7 @@ export default async function ChatPage({ params }: PageProps<"/c/[id]">) {
           {chatNo(chat.id)}
         </span>
         <span className="rounded-md bg-surface-3 px-2.5 py-0.5 text-[12.5px] text-text-2">
-          {chat.companyName}
+          {chat.companyName ?? "공통"}
         </span>
         <span className="rounded-md bg-surface-3 px-2.5 py-0.5 text-[12.5px] text-text-2">
           {chatTypeLabel(chat.type)}
@@ -51,7 +51,6 @@ export default async function ChatPage({ params }: PageProps<"/c/[id]">) {
       {canFollowUp && (
         <Composer
           action={followUpAction}
-          companyName={chat.companyName}
           hidden={{ chatId: chat.id }}
           placeholder="이어서 물어보세요"
         />

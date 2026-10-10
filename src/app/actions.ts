@@ -35,7 +35,7 @@ export async function askAction(formData: FormData) {
   const turn = chat.turns[0];
   startTurn(turn.id, chat.id, {
     requestId: turn.requestId,
-    memberId: companyId,
+    memberId: companyId ?? undefined,
     question,
   });
 
@@ -70,7 +70,7 @@ export async function answerAction(formData: FormData) {
 
   startTurn(turn.id, turn.chatId, {
     requestId: turn.requestId,
-    memberId: turn.chat.companyId,
+    memberId: turn.chat.companyId ?? undefined,
     question: turn.question,
     sessionId: turn.chat.sessionId ?? undefined,
     answers,
@@ -101,7 +101,7 @@ export async function followUpAction(formData: FormData) {
 
   startTurn(turn.id, chatId, {
     requestId: turn.requestId,
-    memberId: chat.companyId,
+    memberId: chat.companyId ?? undefined,
     question,
     sessionId: chat.sessionId ?? undefined,
   });

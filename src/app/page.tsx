@@ -43,7 +43,7 @@ export default async function AskPage() {
                     {chatNo(chat.id)}
                   </span>
                   <span className="rounded-md bg-surface-3 px-2.5 py-0.5 text-[12.5px] text-text-2">
-                    {chat.company.name}
+                    {chat.company?.name ?? "공통"}
                   </span>
                 </div>
                 <div className="line-clamp-1 text-[14.5px] text-text-2">

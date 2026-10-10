@@ -45,8 +45,15 @@ async function main() {
     }),
   ]);
 
-  await prisma.company.create({
-    data: { id: "hll", name: "한화라이프랩" },
+  await prisma.company.createMany({
+    data: [
+      { id: "HLL", name: "한화라이프랩" },
+      { id: "NIKE", name: "뉴니케" },
+      { id: "IFS", name: "인포유금융서비스" },
+      { id: "AT", name: "AT에셋" },
+      { id: "EXL", name: "엑셀금융서비스" },
+      { id: "TAF", name: "토인스오토금융" },
+    ],
   });
 
   const chats: Prisma.ChatCreateInput[] = [
@@ -54,7 +61,7 @@ async function main() {
       type: "LOGIC_REVIEW",
       title: "지사수수료계 0원 산출 사유",
       sessionId: "seed-session-a",
-      company: { connect: { id: "hll" } },
+      company: { connect: { id: "HLL" } },
       member: { connect: { id: sangmin.id } },
       createdAt: ago(1),
       turns: {
@@ -97,7 +104,7 @@ async function main() {
       type: "LOGIC_REVIEW",
       title: "성과수수료 미산출 사유",
       sessionId: "seed-session-b",
-      company: { connect: { id: "hll" } },
+      company: { connect: { id: "HLL" } },
       member: { connect: { id: jimin.id } },
       createdAt: ago(3),
       turns: {
@@ -176,7 +183,7 @@ async function main() {
       type: "ERROR_CAUSE",
       title: "모집수수료율 산출 기준",
       sessionId: "seed-session-c",
-      company: { connect: { id: "hll" } },
+      company: { connect: { id: "HLL" } },
       member: { connect: { id: sangmin.id } },
       createdAt: ago(5),
       turns: {
@@ -206,7 +213,7 @@ async function main() {
       type: "ERROR_CAUSE",
       title: "시책금 반영 후 합계 불일치",
       sessionId: "seed-session-d",
-      company: { connect: { id: "hll" } },
+      company: { connect: { id: "HLL" } },
       member: { connect: { id: jimin.id } },
       createdAt: ago(9),
       turns: {
@@ -225,7 +232,7 @@ async function main() {
     },
     {
       title: "해촉 설계사 수수료 환수 기준",
-      company: { connect: { id: "hll" } },
+      company: { connect: { id: "HLL" } },
       member: { connect: { id: sangmin.id } },
       createdAt: ago(12),
       turns: {
@@ -245,7 +252,7 @@ async function main() {
       type: "LOGIC_REVIEW",
       title: "지점장수수료 조직육성지급율 합산",
       sessionId: "seed-session-f",
-      company: { connect: { id: "hll" } },
+      company: { connect: { id: "HLL" } },
       member: { connect: { id: jimin.id } },
       createdAt: ago(18),
       turns: {

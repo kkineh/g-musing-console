@@ -59,8 +59,9 @@ model Chat {
   /// 엔진 세션 파일은 엔진 쪽 디스크에 있어 이 값만으로 재개가 보장되지 않는다.
   sessionId String?
 
-  companyId String
-  company   Company @relation(fields: [companyId], references: [id])
+  /// 회원사를 특정하지 않는 공통 이슈·일반 수수료 로직 문의가 있어 선택값이다.
+  companyId String?
+  company   Company? @relation(fields: [companyId], references: [id])
   memberId  String
   member    Member  @relation(fields: [memberId], references: [id])
 

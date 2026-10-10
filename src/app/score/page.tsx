@@ -44,7 +44,7 @@ export default async function ScoreQueuePage() {
               {chatTypeLabel(current.chat.type)}
             </span>
             <span className="rounded-md bg-surface-3 px-2.5 py-0.5 text-[12.5px] text-text-2">
-              {current.chat.company.name}
+              {current.chat.company?.name ?? "공통"}
             </span>
             <Link
               href={`/c/${current.chat.id}`}

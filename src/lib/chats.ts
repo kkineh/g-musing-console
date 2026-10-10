@@ -48,8 +48,8 @@ export type ChatView = {
   id: number;
   type: ChatType | null;
   title: string | null;
-  companyId: string;
-  companyName: string;
+  companyId: string | null;
+  companyName: string | null;
   memberName: string;
   sessionId: string | null;
   turns: TurnView[];
@@ -83,7 +83,7 @@ export async function getChat(id: number): Promise<ChatView | null> {
     type: chat.type,
     title: chat.title,
     companyId: chat.companyId,
-    companyName: chat.company.name,
+    companyName: chat.company?.name ?? null,
     memberName: chat.member.name,
     sessionId: chat.sessionId,
     turns: chat.turns.map((t) => ({
@@ -136,8 +136,8 @@ export type HistoryRow = {
   id: number;
   type: ChatType | null;
   title: string;
-  companyId: string;
-  companyName: string;
+  companyId: string | null;
+  companyName: string | null;
   memberName: string;
   createdAt: Date;
   turnCount: number;
@@ -242,7 +242,7 @@ export async function searchHistory(filter: HistoryFilter = {}): Promise<{
         type: chat.type,
         title: chat.title ?? first?.question ?? "제목 없음",
         companyId: chat.companyId,
-        companyName: chat.company.name,
+        companyName: chat.company?.name ?? null,
         memberName: chat.member.name,
         createdAt: chat.createdAt,
         turnCount: chat.turns.length,

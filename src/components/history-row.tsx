@@ -38,7 +38,7 @@ export function HistoryRowCard({
           {chatNo(row.id)}
         </span>
         <Tag>{chatTypeLabel(row.type)}</Tag>
-        <Tag>{row.companyName}</Tag>
+        <Tag>{row.companyName ?? "공통"}</Tag>
         {row.askedBack && <Tag accent>되묻기</Tag>}
         {row.turnCount > 1 && <Tag>{row.turnCount}턴</Tag>}
         {row.status !== "DONE" && (

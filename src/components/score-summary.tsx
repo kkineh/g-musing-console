@@ -8,7 +8,7 @@ type LowRow = {
   title: string | null;
   type: "LOGIC_REVIEW" | "ERROR_CAUSE" | null;
   scoreAvg: number | null;
-  company: { name: string };
+  company: { name: string } | null;
 };
 
 export function ScoreCriteria({ stats }: { stats: TypeStat[] }) {
