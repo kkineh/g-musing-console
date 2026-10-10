@@ -3,47 +3,47 @@
 import { useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 
-export type MemberOption = { id: string; name: string };
+export type CompanyOption = { id: string; name: string };
 
-const LAST_MEMBER_KEY = "lastMemberId";
+const LAST_COMPANY_KEY = "lastCompanyId";
 
 export function Composer({
   action,
-  memberName,
-  members,
+  companyName,
+  companies,
   hidden,
   placeholder = "SR 내용을 붙여넣으세요",
 }: {
   action: (formData: FormData) => void;
-  memberName?: string;
-  members?: MemberOption[];
+  companyName?: string;
+  companies?: CompanyOption[];
   hidden?: Record<string, string | number>;
   placeholder?: string;
 }) {
   /// 마지막으로 쓴 회원사를 기본값으로. useState 초기화 함수는 브라우저에서만
   /// 도는 첫 렌더에 한 번 불리므로 effect로 덮어쓸 필요가 없다.
-  const [memberId, setMemberId] = useState(() => {
-    const fallback = members?.[0]?.id ?? "";
-    if (typeof window === "undefined" || !members?.length) return fallback;
+  const [companyId, setCompanyId] = useState(() => {
+    const fallback = companies?.[0]?.id ?? "";
+    if (typeof window === "undefined" || !companies?.length) return fallback;
     try {
-      const saved = localStorage.getItem(LAST_MEMBER_KEY);
-      return saved && members.some((m) => m.id === saved) ? saved : fallback;
+      const saved = localStorage.getItem(LAST_COMPANY_KEY);
+      return saved && companies.some((c) => c.id === saved) ? saved : fallback;
     } catch {
       return fallback;
     }
   });
 
-  function pickMember(id: string) {
-    setMemberId(id);
+  function pickCompany(id: string) {
+    setCompanyId(id);
     try {
-      localStorage.setItem(LAST_MEMBER_KEY, id);
+      localStorage.setItem(LAST_COMPANY_KEY, id);
     } catch {
       /* 무시 */
     }
   }
 
   const activeName =
-    members?.find((m) => m.id === memberId)?.name ?? memberName ?? "";
+    companies?.find((c) => c.id === companyId)?.name ?? companyName ?? "";
 
   return (
     <div className="pointer-events-none fixed right-0 bottom-0 left-[236px] z-10 flex justify-center px-6 pt-4.5 pb-5.5 [background:linear-gradient(to_top,var(--bg)_60%,transparent)]">
@@ -56,24 +56,24 @@ export function Composer({
             <input key={k} type="hidden" name={k} value={v} />
           ))}
 
-        {members && members.length > 0 && (
+        {companies && companies.length > 0 && (
           <>
-            <input type="hidden" name="memberId" value={memberId} />
-            {members.length > 1 && (
+            <input type="hidden" name="companyId" value={companyId} />
+            {companies.length > 1 && (
               <div className="flex flex-wrap items-center gap-2 px-4 pt-3.5">
-                {members.map((m) => (
+                {companies.map((c) => (
                   <button
-                    key={m.id}
+                    key={c.id}
                     type="button"
-                    onClick={() => pickMember(m.id)}
-                    aria-pressed={memberId === m.id}
+                    onClick={() => pickCompany(c.id)}
+                    aria-pressed={companyId === c.id}
                     className={
-                      memberId === m.id
+                      companyId === c.id
                         ? "cursor-pointer rounded-lg bg-accent-soft px-3 py-1.5 text-[12.5px] font-semibold text-accent-deep"
                         : "cursor-pointer rounded-lg bg-surface-3 px-3 py-1.5 text-[12.5px] font-semibold text-text-2 hover:bg-line"
                     }
                   >
-                    {m.name}
+                    {c.name}
                   </button>
                 ))}
               </div>

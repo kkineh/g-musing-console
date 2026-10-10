@@ -26,7 +26,7 @@ export async function globalSearchAction(
     chats: history.rows.map((row) => ({
       href: `/c/${row.id}`,
       title: row.title,
-      sub: `${chatNo(row.id)} · ${chatTypeLabel(row.type)} · ${row.memberName}`,
+      sub: `${chatNo(row.id)} · ${chatTypeLabel(row.type)} · ${row.companyName}`,
     })),
     docs: wiki.slice(0, 6).map((doc) => ({
       href: `/wiki/${doc.category

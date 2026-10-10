@@ -38,7 +38,7 @@ export function HistoryRowCard({
           {chatNo(row.id)}
         </span>
         <Tag>{chatTypeLabel(row.type)}</Tag>
-        <Tag>{row.memberName}</Tag>
+        <Tag>{row.companyName}</Tag>
         {row.askedBack && <Tag accent>되묻기</Tag>}
         {row.turnCount > 1 && <Tag>{row.turnCount}턴</Tag>}
         {row.status !== "DONE" && (
@@ -85,7 +85,7 @@ export function HistoryRowCard({
       </div>
 
       <div className="flex flex-wrap gap-4 text-[13px] text-text-3">
-        <span>{row.userName}</span>
+        <span>{row.memberName}</span>
         {row.elapsedMs !== null && (
           <span className="font-mono text-[12.5px]">{formatDuration(row.elapsedMs)}</span>
         )}

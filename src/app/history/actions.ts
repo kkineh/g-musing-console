@@ -16,13 +16,13 @@ export async function loadMoreHistory(
 ): Promise<{ rows: HistoryRow[]; nextCursor: number | null }> {
   const filter: HistoryFilter = {
     query: params.q || undefined,
-    memberId: params.member || undefined,
+    companyId: params.company || undefined,
     type: (params.type as ChatType) || undefined,
     status: (params.status as TurnStatus) || undefined,
     from: params.from ? new Date(`${params.from}T00:00:00+09:00`) : undefined,
     to: params.to ? new Date(`${params.to}T23:59:59+09:00`) : undefined,
     scored: params.scored === "yes" ? true : params.scored === "no" ? false : undefined,
-    userId: params.user || undefined,
+    memberId: params.member || undefined,
     sort: (params.sort as HistorySort) || "recent",
     cursor,
   };

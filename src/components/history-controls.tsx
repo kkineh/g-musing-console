@@ -19,12 +19,12 @@ const SORT_OPTIONS = [
 ];
 
 export function HistoryControls({
+  companies,
   members,
-  users,
   total,
 }: {
+  companies: { id: string; name: string }[];
   members: { id: string; name: string }[];
-  users: { id: string; name: string }[];
   total: number;
 }) {
   const router = useRouter();
@@ -57,7 +57,7 @@ export function HistoryControls({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [text, params]);
 
-  const active = ["member", "type", "status", "from", "to", "scored", "user"]
+  const active = ["company", "type", "status", "from", "to", "scored", "member"]
     .filter((k) => params.get(k));
 
   return (
@@ -110,12 +110,12 @@ export function HistoryControls({
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        {members.length > 1 && (
+        {companies.length > 1 && (
           <Select
             label="회원사"
-            value={params.get("member") ?? ""}
-            onChange={(v) => setParam("member", v)}
-            options={members.map((m) => ({ value: m.id, label: m.name }))}
+            value={params.get("company") ?? ""}
+            onChange={(v) => setParam("company", v)}
+            options={companies.map((c) => ({ value: c.id, label: c.name }))}
           />
         )}
         <Select
@@ -141,9 +141,9 @@ export function HistoryControls({
         />
         <Select
           label="질의자"
-          value={params.get("user") ?? ""}
-          onChange={(v) => setParam("user", v)}
-          options={users.map((u) => ({ value: u.id, label: u.name }))}
+          value={params.get("member") ?? ""}
+          onChange={(v) => setParam("member", v)}
+          options={members.map((m) => ({ value: m.id, label: m.name }))}
         />
 
         <input

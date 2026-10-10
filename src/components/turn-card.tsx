@@ -8,12 +8,12 @@ import { ScorePanel } from "./score-panel";
 
 export function TurnCard({
   turn,
-  userName,
+  memberName,
   chatId,
   chatType,
 }: {
   turn: TurnView;
-  userName: string;
+  memberName: string;
   chatId: number;
   chatType: ChatType | null;
 }) {
@@ -21,8 +21,8 @@ export function TurnCard({
     <div className="flex flex-col gap-4.5">
       <section className="rounded-2xl border border-line bg-surface px-6 py-5.5 shadow-card-sm">
         <Head
-          avatar={userName.charAt(0)}
-          who={userName}
+          avatar={memberName.charAt(0)}
+          who={memberName}
           meta={
             <>
               <Pill>{chatTypeLabel(chatType)}</Pill>

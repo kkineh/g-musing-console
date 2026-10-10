@@ -144,7 +144,7 @@ export async function lowScored(threshold = 6, limit = 10) {
       title: true,
       type: true,
       scoreAvg: true,
-      member: { select: { name: true } },
+      company: { select: { name: true } },
     },
   });
 }
@@ -162,7 +162,7 @@ export async function unscoredTurns(limit = 50) {
           id: true,
           title: true,
           type: true,
-          member: { select: { name: true } },
+          company: { select: { name: true } },
         },
       },
     },

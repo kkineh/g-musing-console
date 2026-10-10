@@ -1,14 +1,14 @@
 import {
-  createMemberAction,
-  deleteMemberAction,
-  renameMemberAction,
+  createCompanyAction,
+  deleteCompanyAction,
+  renameCompanyAction,
 } from "../actions";
-import { listMembersWithCounts } from "@/lib/admin";
+import { listCompaniesWithCounts } from "@/lib/admin";
 
 export const dynamic = "force-dynamic";
 
-export default async function MembersPage() {
-  const members = await listMembersWithCounts();
+export default async function CompaniesPage() {
+  const companies = await listCompaniesWithCounts();
 
   return (
     <div className="mx-auto max-w-[760px]">
@@ -22,20 +22,20 @@ export default async function MembersPage() {
       </div>
 
       <div className="mb-5 flex flex-col gap-2">
-        {members.map((m) => (
+        {companies.map((c) => (
           <div
-            key={m.id}
+            key={c.id}
             className="flex flex-wrap items-center gap-3 rounded-2xl border border-line bg-surface px-5 py-3.5 shadow-card-sm"
           >
             <span className="rounded-md bg-surface-3 px-2.5 py-0.5 font-mono text-[12.5px] text-text-2">
-              {m.id}
+              {c.id}
             </span>
 
-            <form action={renameMemberAction} className="flex flex-1 items-center gap-2">
-              <input type="hidden" name="id" value={m.id} />
+            <form action={renameCompanyAction} className="flex flex-1 items-center gap-2">
+              <input type="hidden" name="id" value={c.id} />
               <input
                 name="name"
-                defaultValue={m.name}
+                defaultValue={c.name}
                 className="min-w-[140px] flex-1 rounded-lg border border-line bg-surface-2 px-3 py-1.5 text-[13.5px] outline-none focus:outline-2 focus:outline-accent-line"
               />
               <button
@@ -47,12 +47,12 @@ export default async function MembersPage() {
             </form>
 
             <span className="font-mono text-[12.5px] text-text-3">
-              대화 {m._count.chats}
+              대화 {c._count.chats}
             </span>
 
-            {m._count.chats === 0 && (
-              <form action={deleteMemberAction}>
-                <input type="hidden" name="id" value={m.id} />
+            {c._count.chats === 0 && (
+              <form action={deleteCompanyAction}>
+                <input type="hidden" name="id" value={c.id} />
                 <button
                   type="submit"
                   className="cursor-pointer rounded-lg px-2.5 py-1.5 text-[12.5px] text-text-3 hover:bg-danger-soft hover:text-danger"
@@ -66,7 +66,7 @@ export default async function MembersPage() {
       </div>
 
       <form
-        action={createMemberAction}
+        action={createCompanyAction}
         className="rounded-2xl border border-line bg-surface px-5 py-4 shadow-card-sm"
       >
         <h2 className="mb-3 text-[13px] font-semibold text-text-3">회원사 추가</h2>
