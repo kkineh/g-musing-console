@@ -41,8 +41,30 @@ export function Composer({
     }
   }
 
+  /// 입력창이 fixed라 본문 흐름에서 빠져 있다. 본문이 그만큼 아래를 비우도록
+  /// 실제 높이를 알려준다 — 글이 길어져 textarea가 늘어나면 같이 따라온다.
+  const shellRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = shellRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => {
+      document.documentElement.style.setProperty(
+        "--composer-h",
+        `${Math.round(entry.contentRect.height)}px`,
+      );
+    });
+    ro.observe(el);
+    return () => {
+      ro.disconnect();
+      document.documentElement.style.removeProperty("--composer-h");
+    };
+  }, []);
+
   return (
-    <div className="pointer-events-none fixed right-0 bottom-0 left-[236px] z-10 flex justify-center px-6 pt-4.5 pb-5.5 [background:linear-gradient(to_top,var(--bg)_60%,transparent)]">
+    <div
+      ref={shellRef}
+      className="pointer-events-none fixed right-0 bottom-0 left-[236px] z-10 flex justify-center px-6 pt-4.5 pb-5.5 [background:linear-gradient(to_top,var(--bg)_60%,transparent)]"
+    >
       <form
         action={action}
         className="pointer-events-auto w-full max-w-[820px] rounded-2xl border border-line bg-surface shadow-card-lg"
