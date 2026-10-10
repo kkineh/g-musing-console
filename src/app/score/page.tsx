@@ -47,7 +47,7 @@ export default async function ScoreQueuePage() {
               {current.chat.company?.name ?? "공통"}
             </span>
             <Link
-              href={`/c/${current.chat.id}`}
+              href={`/c/${current.chat.publicId}`}
               className="ml-auto text-[13px] text-accent-deep hover:underline"
             >
               대화 열기 →
@@ -82,7 +82,7 @@ export default async function ScoreQueuePage() {
             {queue.slice(1, 11).map((t) => (
               <Link
                 key={t.id}
-                href={`/c/${t.chat.id}`}
+                href={`/c/${t.chat.publicId}`}
                 className="flex items-center gap-2.5 rounded-lg border border-line bg-surface px-4 py-2.5 text-[13.5px] hover:border-gray-node-line"
               >
                 <span className="font-mono text-[12.5px] text-text-3">

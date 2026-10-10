@@ -60,7 +60,7 @@ export function HistoryRowCard({
 
       <div className="mb-2 flex items-start gap-3">
         <Link
-          href={`/c/${row.id}`}
+          href={`/c/${row.publicId}`}
           className="line-clamp-1 flex-1 text-[15px] leading-[1.55] text-text hover:text-accent"
         >
           <Highlight text={row.title} needle={highlight} />
@@ -116,7 +116,7 @@ export function HistoryRowCard({
           )}
 
           <Link
-            href={`/c/${row.id}`}
+            href={`/c/${row.publicId}`}
             className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-line bg-surface-2 px-4 py-2 text-[13.5px] font-medium text-text-2 hover:border-gray-node-line hover:text-text"
           >
             대화 열기

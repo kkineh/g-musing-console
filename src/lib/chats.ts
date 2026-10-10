@@ -46,6 +46,7 @@ export type TurnView = {
 
 export type ChatView = {
   id: number;
+  publicId: string;
   type: ChatType | null;
   title: string | null;
   companyId: string | null;
@@ -64,9 +65,9 @@ function parse<T>(raw: string | null, fallback: T): T {
   }
 }
 
-export async function getChat(id: number): Promise<ChatView | null> {
+export async function getChat(publicId: string): Promise<ChatView | null> {
   const chat = await prisma.chat.findUnique({
-    where: { id },
+    where: { publicId },
     include: {
       company: true,
       member: true,
@@ -80,6 +81,7 @@ export async function getChat(id: number): Promise<ChatView | null> {
 
   return {
     id: chat.id,
+    publicId: chat.publicId,
     type: chat.type,
     title: chat.title,
     companyId: chat.companyId,
@@ -134,6 +136,7 @@ export async function listChats(limit = 30) {
 
 export type HistoryRow = {
   id: number;
+  publicId: string;
   type: ChatType | null;
   title: string;
   companyId: string | null;
@@ -239,6 +242,7 @@ export async function searchHistory(filter: HistoryFilter = {}): Promise<{
 
       return {
         id: chat.id,
+        publicId: chat.publicId,
         type: chat.type,
         title: chat.title ?? first?.question ?? "제목 없음",
         companyId: chat.companyId,

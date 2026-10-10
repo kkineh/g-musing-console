@@ -24,7 +24,7 @@ export async function globalSearchAction(
 
   return {
     chats: history.rows.map((row) => ({
-      href: `/c/${row.id}`,
+      href: `/c/${row.publicId}`,
       title: row.title,
       sub: `${chatNo(row.id)} · ${chatTypeLabel(row.type)} · ${row.companyName ?? "공통"}`,
     })),

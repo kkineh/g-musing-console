@@ -39,7 +39,7 @@ export async function askAction(formData: FormData) {
     question,
   });
 
-  redirect(`/c/${chat.id}`);
+  redirect(`/c/${chat.publicId}`);
 }
 
 export async function answerAction(formData: FormData) {
@@ -76,7 +76,7 @@ export async function answerAction(formData: FormData) {
     answers,
   });
 
-  revalidatePath(`/c/${turn.chatId}`);
+  revalidatePath(`/c/${turn.chat.publicId}`);
 }
 
 export async function followUpAction(formData: FormData) {
@@ -106,7 +106,7 @@ export async function followUpAction(formData: FormData) {
     sessionId: chat.sessionId ?? undefined,
   });
 
-  revalidatePath(`/c/${chatId}`);
+  revalidatePath(`/c/${chat.publicId}`);
 }
 
 export async function cancelAction(formData: FormData) {
@@ -115,5 +115,10 @@ export async function cancelAction(formData: FormData) {
   if (!Number.isInteger(turnId)) return;
 
   await cancelTurn(turnId);
-  if (Number.isInteger(chatId)) revalidatePath(`/c/${chatId}`);
+  if (!Number.isInteger(chatId)) return;
+  const chat = await prisma.chat.findUnique({
+    where: { id: chatId },
+    select: { publicId: true },
+  });
+  if (chat) revalidatePath(`/c/${chat.publicId}`);
 }

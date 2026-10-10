@@ -5,6 +5,7 @@ import type { TypeStat } from "@/lib/scores";
 
 type LowRow = {
   id: number;
+  publicId: string;
   title: string | null;
   type: "LOGIC_REVIEW" | "ERROR_CAUSE" | null;
   scoreAvg: number | null;
@@ -71,7 +72,7 @@ export function LowScored({ low }: { low: LowRow[] }) {
       {low.map((c) => (
         <Link
           key={c.id}
-          href={`/c/${c.id}`}
+          href={`/c/${c.publicId}`}
           className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-[13px] hover:bg-surface-2"
         >
           <span className="rounded-md bg-danger-soft px-2 py-0.5 font-mono text-[12.5px] font-bold tabular-nums text-danger">

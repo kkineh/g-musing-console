@@ -10,10 +10,7 @@ export const dynamic = "force-dynamic";
 
 export default async function ChatPage({ params }: PageProps<"/c/[id]">) {
   const { id } = await params;
-  const chatId = Number(id);
-  if (!Number.isInteger(chatId)) notFound();
-
-  const chat = await getChat(chatId);
+  const chat = await getChat(id);
   if (!chat) notFound();
 
   const last = chat.turns.at(-1);

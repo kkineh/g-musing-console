@@ -35,7 +35,7 @@ export default async function AskPage() {
             {recent.map((chat) => (
               <Link
                 key={chat.id}
-                href={`/c/${chat.id}`}
+                href={`/c/${chat.publicId}`}
                 className="rounded-2xl border border-line bg-surface px-5 py-3.5 shadow-card-sm hover:border-gray-node-line"
               >
                 <div className="mb-1 flex items-center gap-2.5">

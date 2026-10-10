@@ -52,6 +52,10 @@ model Session {
 model Chat {
   id Int @id @default(autoincrement())
 
+  /// URL에 쓰는 공개 식별자. 순번(id)을 그대로 노출하면 옆 번호를 넣어 남의
+  /// 대화를 찔러볼 수 있고 전체 건수도 드러난다. 화면의 #0021 표기는 id 그대로.
+  publicId String @unique @default(cuid())
+
   /// 엔진이 판별해 돌려준다. 응답 전에는 비어 있다.
   type  ChatType?
   title String?
