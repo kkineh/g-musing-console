@@ -190,6 +190,42 @@ export async function cancelEngine(req: {
   }
 }
 
+export type EngineHealth =
+  | { state: "ok"; running: number; queued: number }
+  | { state: "mock" }
+  | { state: "down"; reason: string };
+
+const HEALTH_TIMEOUT_MS = 3000;
+
+/// 대시보드가 부른다. 엔진이 죽어 있어도 화면은 떠야 하므로 에러를 값으로 돌려준다.
+export async function healthEngine(): Promise<EngineHealth> {
+  const base = process.env.ENGINE_URL;
+  if (!base) return { state: "mock" };
+
+  try {
+    const res = await fetch(`${base}/health`, {
+      signal: AbortSignal.timeout(HEALTH_TIMEOUT_MS),
+      cache: "no-store",
+    });
+    if (!res.ok) return { state: "down", reason: `HTTP ${res.status}` };
+
+    const body = (await res.json()) as {
+      ok: boolean;
+      running: number;
+      queued: number;
+    };
+    if (!body.ok) return { state: "down", reason: "엔진이 ok=false로 응답" };
+
+    return { state: "ok", running: body.running, queued: body.queued };
+  } catch (e) {
+    const reason =
+      e instanceof Error && e.name === "TimeoutError"
+        ? `${HEALTH_TIMEOUT_MS / 1000}초 안에 응답 없음`
+        : "연결할 수 없음";
+    return { state: "down", reason };
+  }
+}
+
 async function mockEngine(
   req: EngineRequest,
   onEvent?: (event: EngineEvent) => void,

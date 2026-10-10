@@ -9,22 +9,6 @@ export default async function WikiIndexPage() {
 
   return (
     <div>
-      <section className="mb-7 rounded-2xl border border-line bg-surface px-7 py-6 shadow-card-sm">
-        <h2 className="mb-2 text-[19px] font-bold tracking-[-0.02em]">
-          사람이 쓰고, 엔진이 읽습니다
-        </h2>
-        <p className="max-w-[540px] text-[14.5px] leading-[1.75] text-text-2">
-          질의에 답할 때 코드와 DB만으로는 알 수 없는 것들이 있습니다. 왜 이렇게
-          동작하는지, 업체마다 무엇이 다른지, 지난번엔 어떻게 처리했는지.
-          그 판단 기준을 여기 모읍니다.
-        </p>
-
-        <div className="mt-5 flex flex-wrap gap-6 border-t border-dashed border-line pt-4">
-          <Stat label="문서" value={overview.docCount} />
-          <Stat label="분류" value={overview.categoryCount} />
-        </div>
-      </section>
-
       {tree.length > 0 && (
         <section className="mb-7">
           <h3 className="mb-3 text-[13px] font-semibold text-text-3">분류</h3>
@@ -88,13 +72,3 @@ export default async function WikiIndexPage() {
   );
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
-  return (
-    <div>
-      <div className="font-mono text-[22px] font-bold tabular-nums text-accent-deep">
-        {value}
-      </div>
-      <div className="text-[12.5px] text-text-3">{label}</div>
-    </div>
-  );
-}

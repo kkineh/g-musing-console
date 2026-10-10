@@ -1,5 +1,4 @@
 import {
-  historySummary,
   searchHistory,
   type HistoryFilter,
   type HistorySort,
@@ -7,10 +6,7 @@ import {
 } from "@/lib/chats";
 import { HistoryList } from "@/components/history-list";
 import { HistoryControls } from "@/components/history-controls";
-import { listMembers } from "@/lib/session";
-import { lowScored, scoreStats } from "@/lib/scores";
-import { ScoreStats } from "@/components/score-stats";
-import Link from "next/link";
+import { listCompanies } from "@/lib/session";
 import { prisma } from "@/lib/db";
 import type { ChatType } from "@/lib/engine";
 
@@ -42,7 +38,7 @@ export default async function HistoryPage({
 
   const filter: HistoryFilter = {
     query: one(sp.q),
-    memberId: one(sp.member),
+    companyId: one(sp.company),
     type: (type as ChatType | undefined) ?? undefined,
     status: STATUSES.includes(status as TurnStatus)
       ? (status as TurnStatus)
@@ -50,17 +46,14 @@ export default async function HistoryPage({
     from: one(sp.from) ? new Date(`${one(sp.from)}T00:00:00+09:00`) : undefined,
     to: one(sp.to) ? new Date(`${one(sp.to)}T23:59:59+09:00`) : undefined,
     scored: scored === "yes" ? true : scored === "no" ? false : undefined,
-    userId: one(sp.user),
+    memberId: one(sp.member),
     sort: SORTS.includes(sort as HistorySort) ? (sort as HistorySort) : "recent",
   };
 
-  const [summary, page, members, users, stats, low] = await Promise.all([
-    historySummary(),
+  const [page, companies, members] = await Promise.all([
     searchHistory(filter),
-    listMembers(),
-    prisma.user.findMany({ orderBy: { name: "asc" } }),
-    scoreStats(),
-    lowScored(),
+    listCompanies(),
+    prisma.member.findMany({ orderBy: { name: "asc" } }),
   ]);
 
   return (
@@ -74,30 +67,9 @@ export default async function HistoryPage({
         </p>
       </div>
 
-      <div className="mb-6 grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
-        <SummaryCard label="전체 처리" value={summary.chatCount} note="누적 질의" />
-        <SummaryCard
-          label="평균 점수"
-          value={summary.averageScore?.toFixed(1) ?? "—"}
-          note={summary.averageScore === null ? "채점 없음" : "채점된 턴 기준"}
-          accent
-        />
-        <SummaryCard label="최근 7일" value={summary.weekCount} note="질의 건수" />
-        <Link href="/score" className="block">
-          <SummaryCard
-            label="채점 대기"
-            value={summary.unscored}
-            note={summary.unscored > 0 ? "채점하러 가기 →" : "완료된 턴 중"}
-            alert={summary.unscored > 0}
-          />
-        </Link>
-      </div>
-
-      <ScoreStats stats={stats} low={low} />
-
       <HistoryControls
-        members={members}
-        users={users.map((u) => ({ id: u.id, name: u.name }))}
+        companies={companies}
+        members={members.map((m) => ({ id: m.id, name: m.name }))}
         total={page.total}
       />
 
@@ -111,40 +83,6 @@ export default async function HistoryPage({
         initialCursor={page.nextCursor}
         query={filter.query ?? ""}
       />
-    </div>
-  );
-}
-
-function SummaryCard({
-  label,
-  value,
-  note,
-  alert,
-  accent,
-}: {
-  label: string;
-  value: string | number;
-  note: string;
-  alert?: boolean;
-  accent?: boolean;
-}) {
-  return (
-    <div className="rounded-2xl border border-line bg-surface px-5 py-4.5 shadow-card-sm">
-      <div className="mb-1.5 text-[13.5px] text-text-3">{label}</div>
-      <div
-        className={`font-mono text-[28px] leading-[1.15] font-bold tracking-[-0.03em] tabular-nums ${accent ? "text-accent-deep" : "text-text"}`}
-      >
-        {value}
-      </div>
-      <div
-        className={
-          alert
-            ? "mt-1 text-[12.5px] font-medium text-warn"
-            : "mt-1 text-[12.5px] text-text-3"
-        }
-      >
-        {note}
-      </div>
     </div>
   );
 }

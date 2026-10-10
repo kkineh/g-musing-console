@@ -2,13 +2,16 @@ import Link from "next/link";
 import { askAction } from "./actions";
 import { Composer } from "@/components/composer";
 import { listChats } from "@/lib/chats";
-import { listMembers } from "@/lib/session";
+import { listCompanies } from "@/lib/session";
 import { chatNo } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
 export default async function AskPage() {
-  const [members, recent] = await Promise.all([listMembers(), listChats(10)]);
+  const [companies, recent] = await Promise.all([
+    listCompanies(),
+    listChats(10),
+  ]);
 
   return (
     <div className="mx-auto max-w-[760px]">
@@ -21,7 +24,7 @@ export default async function AskPage() {
         </p>
       </div>
 
-      <Composer action={askAction} members={members} />
+      <Composer action={askAction} companies={companies} />
 
       {recent.length > 0 && (
         <div className="mt-10">
@@ -40,7 +43,7 @@ export default async function AskPage() {
                     {chatNo(chat.id)}
                   </span>
                   <span className="rounded-md bg-surface-3 px-2.5 py-0.5 text-[12.5px] text-text-2">
-                    {chat.member.name}
+                    {chat.company.name}
                   </span>
                 </div>
                 <div className="line-clamp-1 text-[14.5px] text-text-2">
