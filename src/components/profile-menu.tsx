@@ -2,8 +2,15 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { logoutAction } from "@/app/login/actions";
 
-export function ProfileMenu() {
+export function ProfileMenu({
+  name,
+  role,
+}: {
+  name: string;
+  role: string;
+}) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -32,7 +39,7 @@ export function ProfileMenu() {
         aria-expanded={open}
         className="grid size-[26px] cursor-pointer place-items-center rounded-lg bg-text text-[11px] font-bold text-surface"
       >
-        한
+        {name.charAt(0)}
       </button>
 
       {open && (
@@ -41,8 +48,8 @@ export function ProfileMenu() {
           className="absolute top-[34px] right-0 w-[180px] rounded-xl border border-line bg-surface p-1.5 shadow-card-lg"
         >
           <div className="px-3 py-2">
-            <div className="text-sm font-semibold">한상민</div>
-            <div className="text-[12.5px] text-text-3">관리자</div>
+            <div className="text-sm font-semibold">{name}</div>
+            <div className="text-[12.5px] text-text-3">{role}</div>
           </div>
           <div className="my-1 h-px bg-line-soft" />
           <Link
@@ -53,6 +60,15 @@ export function ProfileMenu() {
           >
             마이페이지
           </Link>
+          <form action={logoutAction}>
+            <button
+              type="submit"
+              role="menuitem"
+              className="block w-full cursor-pointer rounded-lg px-3 py-2 text-left text-sm text-text-2 hover:bg-surface-2 hover:text-text"
+            >
+              로그아웃
+            </button>
+          </form>
         </div>
       )}
     </div>

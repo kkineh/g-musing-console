@@ -28,6 +28,18 @@ const WORKSPACE = [
 
 const ADMIN = [
   {
+    href: "/admin",
+    label: "대시보드",
+    icon: (
+      <>
+        <rect x="2" y="2.5" width="5" height="5" rx="1" />
+        <rect x="9" y="2.5" width="5" height="5" rx="1" />
+        <rect x="2" y="9" width="5" height="4.5" rx="1" />
+        <rect x="9" y="9" width="5" height="4.5" rx="1" />
+      </>
+    ),
+  },
+  {
     href: "/score",
     label: "채점 대기",
     icon: <path d="M3 13.5V9M8 13.5V4.5M13 13.5V7" />,
@@ -45,7 +57,7 @@ const ADMIN = [
     ),
   },
   {
-    href: "/admin/members",
+    href: "/admin/companies",
     label: "회원사 관리",
     icon: (
       <>
@@ -56,11 +68,13 @@ const ADMIN = [
   },
 ];
 
+const EXACT = new Set(["/", "/admin"]);
+
 function isActive(pathname: string, href: string) {
-  return href === "/" ? pathname === "/" : pathname.startsWith(href);
+  return EXACT.has(href) ? pathname === href : pathname.startsWith(href);
 }
 
-export function Sidebar() {
+export function Sidebar({ isAdmin }: { isAdmin: boolean }) {
   const pathname = usePathname();
 
   return (
@@ -98,9 +112,11 @@ export function Sidebar() {
           <NavItems items={WORKSPACE} pathname={pathname} />
           <SidebarWikiItem />
         </div>
-        <div className="mt-5">
-          <NavGroup label="관리" items={ADMIN} pathname={pathname} />
-        </div>
+        {isAdmin && (
+          <div className="mt-5">
+            <NavGroup label="관리" items={ADMIN} pathname={pathname} />
+          </div>
+        )}
       </nav>
 
       <div className="flex shrink-0 items-center border-t border-line-soft px-3 py-2.5">

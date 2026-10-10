@@ -7,7 +7,8 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Member {
+/// 수수료 솔루션을 쓰는 고객사. 저장소·DB가 업체마다 다르다.
+model Company {
   id        String   @id
   name      String
   createdAt DateTime @default(now())
@@ -15,17 +16,37 @@ model Member {
   chats Chat[]
 }
 
-model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String
-  role      String   @default("operator")
+/// 콘솔을 쓰는 사람. 회원가입은 없고 관리자가 발급한다.
+model Member {
+  id       String @id @default(cuid())
+  loginId  String @unique
+  email    String @unique
+  name     String
+  role     String @default("user")
+
+  passwordHash String
+
   createdAt DateTime @default(now())
 
   chats     Chat[]
   scores    Score[]
   revisions WikiRevision[]
   auditLogs AuditLog[]
+  sessions  Session[]
+}
+
+/// 쿠키에는 id만 담는다. 계정을 지우면 세션도 같이 사라져 즉시 로그아웃된다.
+model Session {
+  id String @id @default(cuid())
+
+  memberId String
+  member   Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  @@index([memberId])
+  @@index([expiresAt])
 }
 
 model Chat {
@@ -38,10 +59,10 @@ model Chat {
   /// 엔진 세션 파일은 엔진 쪽 디스크에 있어 이 값만으로 재개가 보장되지 않는다.
   sessionId String?
 
-  memberId String
-  member   Member @relation(fields: [memberId], references: [id])
-  userId   String
-  user     User   @relation(fields: [userId], references: [id])
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+  memberId  String
+  member    Member  @relation(fields: [memberId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -57,6 +78,7 @@ model Chat {
 
   @@index([createdAt])
   @@index([type])
+  @@index([companyId])
   @@index([memberId])
   @@index([lastStatus])
   @@index([scoreAvg])
@@ -117,7 +139,7 @@ model Score {
   turn   Turn @relation(fields: [turnId], references: [id], onDelete: Cascade)
 
   scoredById String
-  scoredBy   User   @relation(fields: [scoredById], references: [id])
+  scoredBy   Member @relation(fields: [scoredById], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -152,19 +174,19 @@ model WikiRevision {
   body     String
 
   editedById String
-  editedBy   User   @relation(fields: [editedById], references: [id])
+  editedBy   Member @relation(fields: [editedById], references: [id])
 
   createdAt DateTime @default(now())
 
   @@index([docId, createdAt])
 }
 
-/// 계정·회원사처럼 사람이 바꾼 것을 남긴다. 질의 처리는 Turn에 남으므로 여기 안 넣는다.
+/// 계정·업체처럼 사람이 바꾼 것을 남긴다. 질의 처리는 Turn에 남으므로 여기 안 넣는다.
 model AuditLog {
   id Int @id @default(autoincrement())
 
   actorId String
-  actor   User   @relation(fields: [actorId], references: [id])
+  actor   Member @relation(fields: [actorId], references: [id])
 
   action String
   target String

@@ -1,18 +1,19 @@
 import {
   createUserAction,
   deleteUserAction,
+  resetPasswordAction,
   updateUserRoleAction,
 } from "../actions";
-import { listUsers, recentAudit, ROLES } from "@/lib/admin";
-import { currentUser } from "@/lib/session";
+import { listMembers, recentAudit, ROLES } from "@/lib/admin";
+import { requireAdmin } from "@/lib/auth";
 import { formatDateTime } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
 export default async function UsersPage() {
-  const [users, me, audit] = await Promise.all([
-    listUsers(),
-    currentUser(),
+  const [members, me, audit] = await Promise.all([
+    listMembers(),
+    requireAdmin(),
     recentAudit(10),
   ]);
 
@@ -23,12 +24,12 @@ export default async function UsersPage() {
           계정 관리
         </h1>
         <p className="text-[14.5px] text-text-3">
-          로그인은 회사 MS 계정으로 합니다. 여기서는 접근 권한만 정합니다.
+          회원가입은 없습니다. 여기서 계정을 발급하고 권한을 정합니다.
         </p>
       </div>
 
       <div className="mb-5 flex flex-col gap-2">
-        {users.map((u) => (
+        {members.map((u) => (
           <div
             key={u.id}
             className="flex flex-wrap items-center gap-3 rounded-2xl border border-line bg-surface px-5 py-3.5 shadow-card-sm"
@@ -41,7 +42,7 @@ export default async function UsersPage() {
                 )}
               </div>
               <div className="font-mono text-[12.5px] text-text-3">
-                {u.email}
+                {u.loginId} · {u.email}
               </div>
             </div>
 
@@ -67,6 +68,24 @@ export default async function UsersPage() {
                 className="cursor-pointer rounded-lg bg-surface-3 px-2.5 py-1.5 text-[12.5px] font-medium text-text-2 hover:bg-line hover:text-text"
               >
                 변경
+              </button>
+            </form>
+
+            <form action={resetPasswordAction} className="flex items-center gap-2">
+              <input type="hidden" name="id" value={u.id} />
+              <input
+                name="password"
+                type="password"
+                required
+                placeholder="새 비밀번호"
+                autoComplete="new-password"
+                className="w-[128px] rounded-lg border border-line bg-surface-2 px-2.5 py-1.5 text-[12.5px] outline-none focus:outline-2 focus:outline-accent-line"
+              />
+              <button
+                type="submit"
+                className="cursor-pointer rounded-lg bg-surface-3 px-2.5 py-1.5 text-[12.5px] font-medium text-text-2 hover:bg-line hover:text-text"
+              >
+                재설정
               </button>
             </form>
 
@@ -98,15 +117,31 @@ export default async function UsersPage() {
             className="w-[140px] rounded-lg border border-line bg-surface-2 px-3 py-2 text-[13.5px] outline-none focus:outline-2 focus:outline-accent-line"
           />
           <input
+            name="loginId"
+            required
+            pattern="[a-z0-9._-]+"
+            placeholder="로그인 아이디"
+            title="영소문자, 숫자, . _ - 만"
+            className="w-[140px] rounded-lg border border-line bg-surface-2 px-3 py-2 text-[13.5px] outline-none focus:outline-2 focus:outline-accent-line"
+          />
+          <input
             name="email"
             type="email"
             required
             placeholder="회사 이메일"
-            className="min-w-[200px] flex-1 rounded-lg border border-line bg-surface-2 px-3 py-2 text-[13.5px] outline-none focus:outline-2 focus:outline-accent-line"
+            className="min-w-[180px] flex-1 rounded-lg border border-line bg-surface-2 px-3 py-2 text-[13.5px] outline-none focus:outline-2 focus:outline-accent-line"
+          />
+          <input
+            name="password"
+            type="password"
+            required
+            placeholder="초기 비밀번호"
+            autoComplete="new-password"
+            className="w-[140px] rounded-lg border border-line bg-surface-2 px-3 py-2 text-[13.5px] outline-none focus:outline-2 focus:outline-accent-line"
           />
           <select
             name="role"
-            defaultValue="member"
+            defaultValue="user"
             className="cursor-pointer rounded-lg border border-line bg-surface px-2.5 py-2 text-[13px] text-text-2 outline-none"
           >
             {ROLES.map((r) => (

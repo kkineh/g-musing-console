@@ -4,10 +4,12 @@ import { ScoreForm } from "@/components/score-form";
 import { unscoredTurns } from "@/lib/scores";
 import { chatTypeLabel } from "@/lib/engine";
 import { chatNo } from "@/lib/format";
+import { requireAdmin } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function ScoreQueuePage() {
+  await requireAdmin();
   const queue = await unscoredTurns();
   const current = queue[0];
 
@@ -42,7 +44,7 @@ export default async function ScoreQueuePage() {
               {chatTypeLabel(current.chat.type)}
             </span>
             <span className="rounded-md bg-surface-3 px-2.5 py-0.5 text-[12.5px] text-text-2">
-              {current.chat.member.name}
+              {current.chat.company.name}
             </span>
             <Link
               href={`/c/${current.chat.id}`}

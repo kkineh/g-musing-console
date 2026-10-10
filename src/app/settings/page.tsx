@@ -1,11 +1,11 @@
 import { updateProfileAction } from "../admin/actions";
 import { roleLabel } from "@/lib/admin";
-import { currentUser } from "@/lib/session";
+import { requireMember } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function SettingsPage() {
-  const user = await currentUser();
+  const user = await requireMember();
 
   return (
     <div className="mx-auto max-w-[560px]">

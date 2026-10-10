@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { saveScore, SCORE_CRITERIA, type ScoreInput } from "@/lib/scores";
-import { currentUser } from "@/lib/session";
+import { requireAdmin } from "@/lib/auth";
 
 function readScores(formData: FormData): ScoreInput {
   const input: ScoreInput = { note: String(formData.get("note") ?? "") };
@@ -23,7 +23,7 @@ export async function scoreAction(formData: FormData) {
   const turnId = Number(formData.get("turnId"));
   if (!Number.isInteger(turnId)) return;
 
-  const user = await currentUser();
+  const user = await requireAdmin();
   await saveScore(turnId, user.id, readScores(formData));
 
   const chatId = Number(formData.get("chatId"));
