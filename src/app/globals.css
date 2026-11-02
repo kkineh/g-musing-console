@@ -23,6 +23,7 @@
   --good-soft: #e8edff;
   --gray-node-line: #9a9ca0;
   --dot: #d8d8d8;
+  --net: #d6d6d6;
   --shadow-sm: 0 1px 2px rgb(15 23 20 / 3%);
   --shadow: 0 1px 2px rgb(15 23 20 / 3%);
   --shadow-lg: 0 8px 24px rgb(15 23 20 / 8%);
@@ -52,6 +53,7 @@
     --good-soft: #1c2440;
     --gray-node-line: #6b6e73;
     --dot: #2a2c30;
+    --net: #464646;
     --shadow-sm: 0 1px 2px rgb(0 0 0 / 25%);
     --shadow: 0 1px 2px rgb(0 0 0 / 25%);
     --shadow-lg: 0 8px 24px rgb(0 0 0 / 35%);
@@ -81,6 +83,7 @@
   --good-soft: #1c2440;
   --gray-node-line: #6b6e73;
   --dot: #2a2c30;
+  --net: #464646;
   --shadow-sm: 0 1px 2px rgb(0 0 0 / 25%);
   --shadow: 0 1px 2px rgb(0 0 0 / 25%);
   --shadow-lg: 0 8px 24px rgb(0 0 0 / 35%);
