@@ -7,6 +7,7 @@ import {
 import { HistoryList } from "@/components/history-list";
 import { HistoryControls } from "@/components/history-controls";
 import { listCompanies } from "@/lib/session";
+import { requireMember } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import type { ChatType } from "@/lib/engine";
 
@@ -30,6 +31,8 @@ export default async function HistoryPage({
   searchParams,
 }: PageProps<"/history">) {
   const sp = await searchParams;
+  const me = await requireMember();
+  const isAdmin = me.role === "admin";
 
   const type = one(sp.type);
   const status = one(sp.status);
@@ -48,6 +51,7 @@ export default async function HistoryPage({
     scored: scored === "yes" ? true : scored === "no" ? false : undefined,
     memberId: one(sp.member),
     sort: SORTS.includes(sort as HistorySort) ? (sort as HistorySort) : "recent",
+    includeDeleted: isAdmin,
   };
 
   const [page, companies, members] = await Promise.all([
@@ -82,6 +86,8 @@ export default async function HistoryPage({
         initialRows={page.rows}
         initialCursor={page.nextCursor}
         query={filter.query ?? ""}
+        meId={me.id}
+        isAdmin={isAdmin}
       />
     </div>
   );

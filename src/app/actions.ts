@@ -88,7 +88,7 @@ export async function followUpAction(formData: FormData) {
     where: { id: chatId },
     include: { turns: { orderBy: { seq: "desc" }, take: 1 } },
   });
-  if (!chat) return;
+  if (!chat || chat.deletedAt) return;
 
   const turn = await prisma.turn.create({
     data: {

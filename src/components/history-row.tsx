@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { deleteChatAction } from "@/app/history/actions";
 import type { HistoryRow } from "@/lib/chats";
 import { chatTypeLabel } from "@/lib/engine";
 import { chatNo, formatDateTime, formatDuration } from "@/lib/format";
@@ -18,11 +19,30 @@ const STATUS_LABEL: Record<HistoryRow["status"], string> = {
 export function HistoryRowCard({
   row,
   highlight = "",
+  isAdmin,
+  canDelete,
+  onDeleted,
 }: {
   row: HistoryRow;
   highlight?: string;
+  isAdmin: boolean;
+  canDelete: boolean;
+  onDeleted: () => void;
 }) {
   const [open, setOpen] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const [pending, startTransition] = useTransition();
+
+  const remove = () =>
+    startTransition(async () => {
+      const ok = await deleteChatAction(row.id);
+      setFailed(!ok);
+      if (ok) {
+        setConfirming(false);
+        onDeleted();
+      }
+    });
 
   const stats = [
     row.filesRead !== null && ["참조 파일", `${row.filesRead}개`],
@@ -49,6 +69,7 @@ export function HistoryRowCard({
             {STATUS_LABEL[row.status]}
           </Tag>
         )}
+        {row.deleted && <Tag>삭제됨</Tag>}
         <span className="ml-auto">
           {row.average !== null ? (
             <Score value={row.average} />
@@ -130,6 +151,52 @@ export function HistoryRowCard({
               <path d="M5 2.5L9.5 7 5 11.5" />
             </svg>
           </Link>
+
+          {canDelete && (
+            <div className="mt-4 flex flex-wrap items-center gap-2.5">
+              {confirming ? (
+                <>
+                  <span className="text-body-sm text-text-2">
+                    {isAdmin
+                      ? "다른 사람에게는 보이지 않게 됩니다. 관리자 화면에는 남습니다. 되돌릴 수 없습니다."
+                      : "이 대화를 처리 이력과 대화 화면에서 지웁니다. 되돌릴 수 없습니다."}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={remove}
+                    disabled={pending}
+                    className="rounded-lg bg-danger-soft px-3 py-1.5 text-caption font-medium text-danger disabled:opacity-60"
+                  >
+                    {pending ? "삭제 중…" : "삭제"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setConfirming(false);
+                      setFailed(false);
+                    }}
+                    disabled={pending}
+                    className="rounded-lg px-3 py-1.5 text-caption text-text-3 hover:bg-surface-3 hover:text-text"
+                  >
+                    취소
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setConfirming(true)}
+                  className="rounded-lg px-2.5 py-1.5 text-caption text-text-3 hover:bg-danger-soft hover:text-danger"
+                >
+                  대화 삭제
+                </button>
+              )}
+              {failed && (
+                <span className="w-full text-body-sm text-danger">
+                  삭제하지 못했습니다. 새로고침 후 다시 시도해 주세요.
+                </span>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

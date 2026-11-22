@@ -53,6 +53,7 @@ export type ChatView = {
   companyName: string | null;
   memberName: string;
   sessionId: string | null;
+  deletedAt: Date | null;
   turns: TurnView[];
 };
 
@@ -88,6 +89,7 @@ export async function getChat(publicId: string): Promise<ChatView | null> {
     companyName: chat.company?.name ?? null,
     memberName: chat.member.name,
     sessionId: chat.sessionId,
+    deletedAt: chat.deletedAt,
     turns: chat.turns.map((t) => ({
       id: t.id,
       seq: t.seq,
@@ -125,6 +127,7 @@ export async function getChat(publicId: string): Promise<ChatView | null> {
 
 export async function listChats(limit = 30) {
   return prisma.chat.findMany({
+    where: { deletedAt: null },
     orderBy: { updatedAt: "desc" },
     take: limit,
     include: {
@@ -141,8 +144,10 @@ export type HistoryRow = {
   title: string;
   companyId: string | null;
   companyName: string | null;
+  memberId: string;
   memberName: string;
   createdAt: Date;
+  deleted: boolean;
   turnCount: number;
   status: TurnStatus;
   askedBack: boolean;
@@ -167,6 +172,8 @@ export type HistoryFilter = {
   scored?: boolean;
   memberId?: string;
   sort?: HistorySort;
+  /// 관리자만 true. 삭제(숨김)된 대화도 채점 재료로 본다.
+  includeDeleted?: boolean;
   cursor?: number;
   limit?: number;
 };
@@ -177,6 +184,7 @@ function historyWhere(f: HistoryFilter) {
   const q = f.query?.trim();
 
   return {
+    ...(!f.includeDeleted && { deletedAt: null }),
     ...(q && {
       OR: [
         { title: { contains: q } },
@@ -247,8 +255,10 @@ export async function searchHistory(filter: HistoryFilter = {}): Promise<{
         title: chat.title ?? first?.question ?? "제목 없음",
         companyId: chat.companyId,
         companyName: chat.company?.name ?? null,
+        memberId: chat.memberId,
         memberName: chat.member.name,
         createdAt: chat.createdAt,
+        deleted: chat.deletedAt != null,
         turnCount: chat.turns.length,
         status: chat.lastStatus,
         askedBack: chat.turns.some(

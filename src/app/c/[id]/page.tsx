@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { followUpAction } from "@/app/actions";
 import { Composer } from "@/components/composer";
 import { TurnCard } from "@/components/turn-card";
+import { requireMember } from "@/lib/auth";
 import { getChat } from "@/lib/chats";
 import { chatTypeLabel } from "@/lib/engine";
 import { chatNo } from "@/lib/format";
@@ -10,14 +11,17 @@ export const dynamic = "force-dynamic";
 
 export default async function ChatPage({ params }: PageProps<"/c/[id]">) {
   const { id } = await params;
-  const chat = await getChat(id);
+  const [chat, me] = await Promise.all([getChat(id), requireMember()]);
   if (!chat) notFound();
+  /// 삭제된 대화는 채점 재료로 관리자에게만 남긴다.
+  if (chat.deletedAt && me.role !== "admin") notFound();
 
   const last = chat.turns.at(-1);
   const canFollowUp =
-    last?.status === "DONE" ||
+    !chat.deletedAt &&
+    (last?.status === "DONE" ||
     last?.status === "FAILED" ||
-    last?.status === "CANCELED";
+    last?.status === "CANCELED");
 
   return (
     <div className="mx-auto max-w-[760px]">
@@ -32,6 +36,12 @@ export default async function ChatPage({ params }: PageProps<"/c/[id]">) {
           {chatTypeLabel(chat.type)}
         </span>
       </div>
+
+      {chat.deletedAt && (
+        <p className="mb-4.5 rounded-xl bg-surface-3 px-4 py-3 text-body-sm text-text-2">
+          삭제된 대화입니다. 관리자에게만 보이며 이어서 질의할 수 없습니다.
+        </p>
+      )}
 
       <div className="flex flex-col gap-4.5">
         {chat.turns.map((turn) => (

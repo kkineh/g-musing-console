@@ -21,6 +21,7 @@ const AUDIT_LABEL: Record<string, string> = {
   "profile.rename": "이름 변경",
   "wiki.edit": "Wiki 수정",
   "wiki.restore": "Wiki 복원",
+  "chat.delete": "대화 삭제",
 };
 
 const ROLE_DETAIL_ACTIONS = new Set(["user.create", "user.role"]);

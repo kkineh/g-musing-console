@@ -10,10 +10,14 @@ export function HistoryList({
   initialRows,
   initialCursor,
   query,
+  meId,
+  isAdmin,
 }: {
   initialRows: HistoryRow[];
   initialCursor: number | null;
   query: string;
+  meId: string;
+  isAdmin: boolean;
 }) {
   const params = useSearchParams();
   const key = params.toString();
@@ -65,7 +69,21 @@ export function HistoryList({
   return (
     <div className="flex flex-col gap-2.5">
       {rows.map((row) => (
-        <HistoryRowCard key={row.id} row={row} highlight={query} />
+        <HistoryRowCard
+          key={row.id}
+          row={row}
+          highlight={query}
+          isAdmin={isAdmin}
+          canDelete={!row.deleted && (isAdmin || row.memberId === meId)}
+          onDeleted={() =>
+            /// 관리자는 삭제된 대화도 보므로 행을 빼지 않고 표시만 바꾼다.
+            setRows((prev) =>
+              isAdmin
+                ? prev.map((r) => (r.id === row.id ? { ...r, deleted: true } : r))
+                : prev.filter((r) => r.id !== row.id),
+            )
+          }
+        />
       ))}
 
       {cursor !== null && (

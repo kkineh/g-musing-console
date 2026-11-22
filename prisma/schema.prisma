@@ -79,6 +79,10 @@ model Chat {
   totalMs     Int?
   scoreAvg    Float?
 
+  /// 사용자 삭제는 숨김이다. 질의·답변·채점은 엔진 개선 재료라 지우지 않는다.
+  /// 관리자 화면(이력·채점·대시보드)에는 계속 보인다.
+  deletedAt DateTime?
+
   turns Turn[]
 
   @@index([createdAt])
@@ -88,6 +92,7 @@ model Chat {
   @@index([lastStatus])
   @@index([scoreAvg])
   @@index([totalMs])
+  @@index([deletedAt])
 }
 
 model Turn {
