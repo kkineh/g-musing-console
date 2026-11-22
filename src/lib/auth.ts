@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { forbidden, redirect } from "next/navigation";
 import { prisma } from "./db";
 import { verifyPassword } from "./password";
 import { SESSION_COOKIE } from "./session-cookie";
@@ -68,6 +68,6 @@ export async function requireMember() {
 
 export async function requireAdmin() {
   const member = await requireMember();
-  if (member.role !== "admin") redirect("/");
+  if (member.role !== "admin") forbidden();
   return member;
 }
