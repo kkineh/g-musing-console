@@ -159,7 +159,7 @@ const meshes: Record<ErrorCode, Mesh> = {
 export const primaryButton =
   "rounded-lg bg-accent px-3.5 py-2 text-label font-semibold text-on-accent hover:bg-accent-deep";
 export const secondaryButton =
-  "rounded-lg border border-line bg-surface px-3.5 py-2 text-label text-text-2 hover:bg-surface-3";
+  "rounded-lg border border-line bg-surface px-3.5 py-2 text-label text-text-2 hover:border-gray-node-line hover:text-text";
 
 export function ErrorScreen({
   code,

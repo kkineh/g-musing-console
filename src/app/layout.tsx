@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Noto_Sans_KR } from "next/font/google";
 import "./globals.css";
 import { AppShell } from "@/components/app-shell";
+import { ThemeSync } from "@/components/theme-sync";
 import { currentMember } from "@/lib/auth";
 import { roleLabel } from "@/lib/admin";
 
@@ -40,6 +41,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         />
       </head>
       <body className="min-h-full">
+        <ThemeSync />
         <AppShell
           name={member?.name ?? ""}
           role={member ? roleLabel(member.role) : ""}
