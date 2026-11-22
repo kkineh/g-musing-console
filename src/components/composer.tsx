@@ -1,11 +1,22 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useFormStatus } from "react-dom";
 
 export type CompanyOption = { id: string; name: string };
 
 const LAST_COMPANY_KEY = "lastCompanyId";
+
+/// 저장값은 이 탭 밖에서 바뀌어도 따라가지 않는다. 읽는 시점만 하이드레이션 뒤로 미룬다.
+const subscribeNothing = () => () => {};
+
+function readSavedCompanyId() {
+  try {
+    return localStorage.getItem(LAST_COMPANY_KEY) ?? "";
+  } catch {
+    return "";
+  }
+}
 
 export function Composer({
   action,
@@ -20,19 +31,20 @@ export function Composer({
 }) {
   /// 마지막으로 쓴 회원사를 복원한다. 없으면 빈 값 — 첫 회원사로 멋대로 채우지
   /// 않는다. 엉뚱한 회원사로 조회되는 것보다 안 고른 게 드러나는 편이 낫다.
-  /// useState 초기화 함수는 브라우저에서만 도는 첫 렌더에 한 번 불린다.
-  const [companyId, setCompanyId] = useState(() => {
-    if (typeof window === "undefined" || !companies?.length) return "";
-    try {
-      const saved = localStorage.getItem(LAST_COMPANY_KEY);
-      return saved && companies.some((c) => c.id === saved) ? saved : "";
-    } catch {
-      return "";
-    }
-  });
+  /// 서버와 하이드레이션은 빈 값으로 그리고, 그 뒤에 localStorage 값으로 바뀐다.
+  /// 렌더 중에 localStorage를 바로 읽으면 서버(빈 값)와 브라우저(저장된 값)가 달라
+  /// 하이드레이션이 깨진다.
+  const savedId = useSyncExternalStore(
+    subscribeNothing,
+    readSavedCompanyId,
+    () => "",
+  );
+  const [pickedId, setPickedId] = useState<string | null>(null);
+  const companyId =
+    pickedId ?? (companies?.some((c) => c.id === savedId) ? savedId : "");
 
   function pickCompany(id: string) {
-    setCompanyId(id);
+    setPickedId(id);
     try {
       if (id) localStorage.setItem(LAST_COMPANY_KEY, id);
       else localStorage.removeItem(LAST_COMPANY_KEY);
