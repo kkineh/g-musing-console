@@ -1,4 +1,5 @@
 import { PrismaClient, type Prisma } from "@prisma/client";
+import { hashPassword } from "../src/lib/password";
 
 const prisma = new PrismaClient();
 
@@ -7,23 +8,52 @@ const ago = (days: number) => new Date(Date.now() - days * DAY);
 
 async function main() {
   await prisma.chat.deleteMany();
-  await prisma.member.deleteMany();
+  await prisma.company.deleteMany();
+
+  const devLoginId = process.env.DEV_LOGIN_ID ?? "hsm";
+  const devPassword = process.env.DEV_LOGIN_PASSWORD;
+  if (!devPassword) {
+    throw new Error(
+      "DEV_LOGIN_PASSWORD가 없습니다. .env에 넣고 다시 실행하세요 (.env.example 참고)",
+    );
+  }
+  /// 두 계정에 같은 비밀번호를 쓴다. 개발용이고, 역할만 바꿔 로그인해보는 용도다.
+  const passwordHash = await hashPassword(devPassword);
 
   const [sangmin, jimin] = await Promise.all([
-    prisma.user.upsert({
+    prisma.member.upsert({
       where: { email: "sangmin@example.com" },
-      update: {},
-      create: { email: "sangmin@example.com", name: "한상민", role: "admin" },
+      update: { loginId: devLoginId, passwordHash, role: "admin" },
+      create: {
+        loginId: devLoginId,
+        email: "sangmin@example.com",
+        name: "한상민",
+        role: "admin",
+        passwordHash,
+      },
     }),
-    prisma.user.upsert({
+    prisma.member.upsert({
       where: { email: "jimin@example.com" },
-      update: {},
-      create: { email: "jimin@example.com", name: "김지민", role: "admin" },
+      update: { loginId: "kjm", passwordHash, role: "user" },
+      create: {
+        loginId: "kjm",
+        email: "jimin@example.com",
+        name: "김지민",
+        role: "user",
+        passwordHash,
+      },
     }),
   ]);
 
-  await prisma.member.create({
-    data: { id: "hll", name: "한화라이프랩" },
+  await prisma.company.createMany({
+    data: [
+      { id: "HLL", name: "한화라이프랩" },
+      { id: "NIKE", name: "뉴니케" },
+      { id: "IFS", name: "인포유금융서비스" },
+      { id: "AT", name: "AT에셋" },
+      { id: "EXL", name: "엑셀금융서비스" },
+      { id: "TAF", name: "토인스오토금융" },
+    ],
   });
 
   const chats: Prisma.ChatCreateInput[] = [
@@ -31,8 +61,8 @@ async function main() {
       type: "LOGIC_REVIEW",
       title: "지사수수료계 0원 산출 사유",
       sessionId: "seed-session-a",
-      member: { connect: { id: "hll" } },
-      user: { connect: { id: sangmin.id } },
+      company: { connect: { id: "HLL" } },
+      member: { connect: { id: sangmin.id } },
       createdAt: ago(1),
       turns: {
         create: {
@@ -74,8 +104,8 @@ async function main() {
       type: "LOGIC_REVIEW",
       title: "성과수수료 미산출 사유",
       sessionId: "seed-session-b",
-      member: { connect: { id: "hll" } },
-      user: { connect: { id: jimin.id } },
+      company: { connect: { id: "HLL" } },
+      member: { connect: { id: jimin.id } },
       createdAt: ago(3),
       turns: {
         create: [
@@ -153,8 +183,8 @@ async function main() {
       type: "ERROR_CAUSE",
       title: "모집수수료율 산출 기준",
       sessionId: "seed-session-c",
-      member: { connect: { id: "hll" } },
-      user: { connect: { id: sangmin.id } },
+      company: { connect: { id: "HLL" } },
+      member: { connect: { id: sangmin.id } },
       createdAt: ago(5),
       turns: {
         create: {
@@ -183,8 +213,8 @@ async function main() {
       type: "ERROR_CAUSE",
       title: "시책금 반영 후 합계 불일치",
       sessionId: "seed-session-d",
-      member: { connect: { id: "hll" } },
-      user: { connect: { id: jimin.id } },
+      company: { connect: { id: "HLL" } },
+      member: { connect: { id: jimin.id } },
       createdAt: ago(9),
       turns: {
         create: {
@@ -202,8 +232,8 @@ async function main() {
     },
     {
       title: "해촉 설계사 수수료 환수 기준",
-      member: { connect: { id: "hll" } },
-      user: { connect: { id: sangmin.id } },
+      company: { connect: { id: "HLL" } },
+      member: { connect: { id: sangmin.id } },
       createdAt: ago(12),
       turns: {
         create: {
@@ -222,8 +252,8 @@ async function main() {
       type: "LOGIC_REVIEW",
       title: "지점장수수료 조직육성지급율 합산",
       sessionId: "seed-session-f",
-      member: { connect: { id: "hll" } },
-      user: { connect: { id: jimin.id } },
+      company: { connect: { id: "HLL" } },
+      member: { connect: { id: jimin.id } },
       createdAt: ago(18),
       turns: {
         create: {

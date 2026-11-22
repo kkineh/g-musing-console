@@ -193,9 +193,8 @@ export async function restoreRevision(revisionId: number, editedById: string) {
 }
 
 export async function wikiOverview() {
-  const [docCount, categories, recent] = await Promise.all([
+  const [docCount, recent] = await Promise.all([
     prisma.wikiDoc.count(),
-    prisma.wikiDoc.findMany({ select: { category: true }, distinct: ["category"] }),
     prisma.wikiDoc.findMany({
       orderBy: { updatedAt: "desc" },
       take: 5,
@@ -203,11 +202,7 @@ export async function wikiOverview() {
     }),
   ]);
 
-  return {
-    docCount,
-    categoryCount: new Set(categories.map((c) => c.category.split("/")[0])).size,
-    recent,
-  };
+  return { docCount, recent };
 }
 
 export async function allDocRefs(): Promise<WikiDocRef[]> {

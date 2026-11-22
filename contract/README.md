@@ -6,7 +6,7 @@
 engine.ts (TypeScript + Zod)     ← 여기를 고친다
     │
     └─ pnpm contract ──▶ openapi.json
-                            ├──▶ 문서 (Scalar)
+                            ├──▶ 문서 (Swagger)
                             └──▶ 목업 (Prism)
 ```
 
@@ -14,7 +14,7 @@ engine.ts (TypeScript + Zod)     ← 여기를 고친다
 
 ```bash
 pnpm contract        # openapi.json 생성
-pnpm contract:docs   # 문서 → localhost:4100/docs.html
+pnpm contract:docs   # 문서 → localhost:4100/
 pnpm contract:mock   # 목업 엔진 → localhost:4000
 ```
 

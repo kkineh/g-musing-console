@@ -141,10 +141,11 @@ export async function lowScored(threshold = 6, limit = 10) {
     take: limit,
     select: {
       id: true,
+      publicId: true,
       title: true,
       type: true,
       scoreAvg: true,
-      member: { select: { name: true } },
+      company: { select: { name: true } },
     },
   });
 }
@@ -160,9 +161,10 @@ export async function unscoredTurns(limit = 50) {
       chat: {
         select: {
           id: true,
+          publicId: true,
           title: true,
           type: true,
-          member: { select: { name: true } },
+          company: { select: { name: true } },
         },
       },
     },

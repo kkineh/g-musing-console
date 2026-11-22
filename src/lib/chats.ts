@@ -46,12 +46,14 @@ export type TurnView = {
 
 export type ChatView = {
   id: number;
+  publicId: string;
   type: ChatType | null;
   title: string | null;
-  memberId: string;
+  companyId: string | null;
+  companyName: string | null;
   memberName: string;
-  userName: string;
   sessionId: string | null;
+  deletedAt: Date | null;
   turns: TurnView[];
 };
 
@@ -64,12 +66,12 @@ function parse<T>(raw: string | null, fallback: T): T {
   }
 }
 
-export async function getChat(id: number): Promise<ChatView | null> {
+export async function getChat(publicId: string): Promise<ChatView | null> {
   const chat = await prisma.chat.findUnique({
-    where: { id },
+    where: { publicId },
     include: {
+      company: true,
       member: true,
-      user: true,
       turns: {
         orderBy: { seq: "asc" },
         include: { score: { include: { scoredBy: true } } },
@@ -80,12 +82,14 @@ export async function getChat(id: number): Promise<ChatView | null> {
 
   return {
     id: chat.id,
+    publicId: chat.publicId,
     type: chat.type,
     title: chat.title,
-    memberId: chat.memberId,
+    companyId: chat.companyId,
+    companyName: chat.company?.name ?? null,
     memberName: chat.member.name,
-    userName: chat.user.name,
     sessionId: chat.sessionId,
+    deletedAt: chat.deletedAt,
     turns: chat.turns.map((t) => ({
       id: t.id,
       seq: t.seq,
@@ -123,10 +127,11 @@ export async function getChat(id: number): Promise<ChatView | null> {
 
 export async function listChats(limit = 30) {
   return prisma.chat.findMany({
+    where: { deletedAt: null },
     orderBy: { updatedAt: "desc" },
     take: limit,
     include: {
-      member: true,
+      company: true,
       turns: { orderBy: { seq: "asc" }, take: 1 },
     },
   });
@@ -134,12 +139,15 @@ export async function listChats(limit = 30) {
 
 export type HistoryRow = {
   id: number;
+  publicId: string;
   type: ChatType | null;
   title: string;
+  companyId: string | null;
+  companyName: string | null;
   memberId: string;
   memberName: string;
-  userName: string;
   createdAt: Date;
+  deleted: boolean;
   turnCount: number;
   status: TurnStatus;
   askedBack: boolean;
@@ -156,14 +164,16 @@ export type HistorySort = "recent" | "score" | "duration";
 
 export type HistoryFilter = {
   query?: string;
-  memberId?: string;
+  companyId?: string;
   type?: ChatType;
   status?: TurnStatus;
   from?: Date;
   to?: Date;
   scored?: boolean;
-  userId?: string;
+  memberId?: string;
   sort?: HistorySort;
+  /// 관리자만 true. 삭제(숨김)된 대화도 채점 재료로 본다.
+  includeDeleted?: boolean;
   cursor?: number;
   limit?: number;
 };
@@ -174,6 +184,7 @@ function historyWhere(f: HistoryFilter) {
   const q = f.query?.trim();
 
   return {
+    ...(!f.includeDeleted && { deletedAt: null }),
     ...(q && {
       OR: [
         { title: { contains: q } },
@@ -181,10 +192,10 @@ function historyWhere(f: HistoryFilter) {
         { turns: { some: { answer: { contains: q } } } },
       ],
     }),
-    ...(f.memberId && { memberId: f.memberId }),
+    ...(f.companyId && { companyId: f.companyId }),
     ...(f.type && { type: f.type }),
     ...(f.status && { lastStatus: f.status }),
-    ...(f.userId && { userId: f.userId }),
+    ...(f.memberId && { memberId: f.memberId }),
     ...(f.scored !== undefined && {
       scoreAvg: f.scored ? { not: null } : null,
     }),
@@ -216,8 +227,8 @@ export async function searchHistory(filter: HistoryFilter = {}): Promise<{
       take: take + 1,
       ...(filter.cursor && { cursor: { id: filter.cursor }, skip: 1 }),
       include: {
+        company: true,
         member: true,
-        user: true,
         turns: {
           orderBy: { seq: "asc" },
           include: { score: { include: { scoredBy: true } } },
@@ -239,12 +250,15 @@ export async function searchHistory(filter: HistoryFilter = {}): Promise<{
 
       return {
         id: chat.id,
+        publicId: chat.publicId,
         type: chat.type,
         title: chat.title ?? first?.question ?? "제목 없음",
+        companyId: chat.companyId,
+        companyName: chat.company?.name ?? null,
         memberId: chat.memberId,
         memberName: chat.member.name,
-        userName: chat.user.name,
         createdAt: chat.createdAt,
+        deleted: chat.deletedAt != null,
         turnCount: chat.turns.length,
         status: chat.lastStatus,
         askedBack: chat.turns.some(

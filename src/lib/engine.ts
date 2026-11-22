@@ -15,7 +15,9 @@ export function chatTypeLabel(type: ChatType | null) {
 export type EngineRequest = {
   /// 콘솔이 만든다. 취소와 재시도 중복 차단에 쓴다.
   requestId: string;
-  memberId: string;
+  /// 회원사를 특정하지 않는 공통 이슈 문의가 있어 선택값이다. 없으면 엔진이
+  /// 특정 회원사 저장소·DB에 매이지 않고 일반 수수료 로직으로 답한다.
+  memberId?: string;
   question: string;
   sessionId?: string;
   answers?: Record<string, string>;
@@ -187,6 +189,42 @@ export async function cancelEngine(req: {
     return body.canceled;
   } catch {
     return false;
+  }
+}
+
+export type EngineHealth =
+  | { state: "ok"; running: number; queued: number }
+  | { state: "mock" }
+  | { state: "down"; reason: string };
+
+const HEALTH_TIMEOUT_MS = 3000;
+
+/// 대시보드가 부른다. 엔진이 죽어 있어도 화면은 떠야 하므로 에러를 값으로 돌려준다.
+export async function healthEngine(): Promise<EngineHealth> {
+  const base = process.env.ENGINE_URL;
+  if (!base) return { state: "mock" };
+
+  try {
+    const res = await fetch(`${base}/health`, {
+      signal: AbortSignal.timeout(HEALTH_TIMEOUT_MS),
+      cache: "no-store",
+    });
+    if (!res.ok) return { state: "down", reason: `HTTP ${res.status}` };
+
+    const body = (await res.json()) as {
+      ok: boolean;
+      running: number;
+      queued: number;
+    };
+    if (!body.ok) return { state: "down", reason: "엔진이 ok=false로 응답" };
+
+    return { state: "ok", running: body.running, queued: body.queued };
+  } catch (e) {
+    const reason =
+      e instanceof Error && e.name === "TimeoutError"
+        ? `${HEALTH_TIMEOUT_MS / 1000}초 안에 응답 없음`
+        : "연결할 수 없음";
+    return { state: "down", reason };
   }
 }
 

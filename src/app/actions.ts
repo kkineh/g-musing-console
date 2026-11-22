@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { cancelTurn, startTurn } from "@/lib/runner";
-import { currentUser, resolveMember } from "@/lib/session";
+import { resolveCompany } from "@/lib/session";
+import { requireMember } from "@/lib/auth";
 
 function titleFrom(question: string) {
   const line = question.trim().split("\n")[0];
@@ -15,16 +16,16 @@ export async function askAction(formData: FormData) {
   const question = String(formData.get("question") ?? "").trim();
   if (!question) return;
 
-  const [user, memberId] = await Promise.all([
-    currentUser(),
-    resolveMember(String(formData.get("memberId") ?? "")),
+  const [member, companyId] = await Promise.all([
+    requireMember(),
+    resolveCompany(String(formData.get("companyId") ?? "")),
   ]);
 
   const chat = await prisma.chat.create({
     data: {
       title: titleFrom(question),
-      memberId,
-      userId: user.id,
+      companyId,
+      memberId: member.id,
       lastStatus: "QUEUED",
       turns: { create: { seq: 1, status: "QUEUED", question } },
     },
@@ -34,11 +35,11 @@ export async function askAction(formData: FormData) {
   const turn = chat.turns[0];
   startTurn(turn.id, chat.id, {
     requestId: turn.requestId,
-    memberId,
+    memberId: companyId ?? undefined,
     question,
   });
 
-  redirect(`/c/${chat.id}`);
+  redirect(`/c/${chat.publicId}`);
 }
 
 export async function answerAction(formData: FormData) {
@@ -69,13 +70,13 @@ export async function answerAction(formData: FormData) {
 
   startTurn(turn.id, turn.chatId, {
     requestId: turn.requestId,
-    memberId: turn.chat.memberId,
+    memberId: turn.chat.companyId ?? undefined,
     question: turn.question,
     sessionId: turn.chat.sessionId ?? undefined,
     answers,
   });
 
-  revalidatePath(`/c/${turn.chatId}`);
+  revalidatePath(`/c/${turn.chat.publicId}`);
 }
 
 export async function followUpAction(formData: FormData) {
@@ -87,7 +88,7 @@ export async function followUpAction(formData: FormData) {
     where: { id: chatId },
     include: { turns: { orderBy: { seq: "desc" }, take: 1 } },
   });
-  if (!chat) return;
+  if (!chat || chat.deletedAt) return;
 
   const turn = await prisma.turn.create({
     data: {
@@ -100,12 +101,12 @@ export async function followUpAction(formData: FormData) {
 
   startTurn(turn.id, chatId, {
     requestId: turn.requestId,
-    memberId: chat.memberId,
+    memberId: chat.companyId ?? undefined,
     question,
     sessionId: chat.sessionId ?? undefined,
   });
 
-  revalidatePath(`/c/${chatId}`);
+  revalidatePath(`/c/${chat.publicId}`);
 }
 
 export async function cancelAction(formData: FormData) {
@@ -114,5 +115,10 @@ export async function cancelAction(formData: FormData) {
   if (!Number.isInteger(turnId)) return;
 
   await cancelTurn(turnId);
-  if (Number.isInteger(chatId)) revalidatePath(`/c/${chatId}`);
+  if (!Number.isInteger(chatId)) return;
+  const chat = await prisma.chat.findUnique({
+    where: { id: chatId },
+    select: { publicId: true },
+  });
+  if (chat) revalidatePath(`/c/${chat.publicId}`);
 }

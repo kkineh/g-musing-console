@@ -19,12 +19,12 @@ const SORT_OPTIONS = [
 ];
 
 export function HistoryControls({
+  companies,
   members,
-  users,
   total,
 }: {
+  companies: { id: string; name: string }[];
   members: { id: string; name: string }[];
-  users: { id: string; name: string }[];
   total: number;
 }) {
   const router = useRouter();
@@ -57,7 +57,7 @@ export function HistoryControls({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [text, params]);
 
-  const active = ["member", "type", "status", "from", "to", "scored", "user"]
+  const active = ["company", "type", "status", "from", "to", "scored", "member"]
     .filter((k) => params.get(k));
 
   return (
@@ -78,12 +78,12 @@ export function HistoryControls({
             type="search"
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="질문, 답변 내용 검색"
-            className="w-full rounded-lg border border-line bg-surface py-2.5 pr-4 pl-9 text-sm text-text outline-none placeholder:text-text-3 focus:outline-2 focus:outline-accent-line"
+            placeholder="질의, 답변 내용 검색"
+            className="w-full rounded-lg border border-line bg-surface py-2.5 pr-4 pl-9 text-body-sm text-text outline-none placeholder:text-text-3 focus:outline-2 focus:outline-accent-line"
           />
         </div>
 
-        <span className="font-mono text-[13px] text-text-3">
+        <span className="font-mono text-label text-text-3">
           {total.toLocaleString("ko-KR")}건
         </span>
 
@@ -98,8 +98,8 @@ export function HistoryControls({
                 aria-pressed={on}
                 className={
                   on
-                    ? "cursor-pointer rounded-lg bg-accent-soft px-3 py-1.5 text-[12.5px] font-semibold text-accent-deep"
-                    : "cursor-pointer rounded-lg px-3 py-1.5 text-[12.5px] font-semibold text-text-3 hover:bg-surface-3 hover:text-text"
+                    ? "cursor-pointer rounded-lg bg-accent-soft px-3 py-1.5 text-caption font-semibold text-accent-deep"
+                    : "cursor-pointer rounded-lg px-3 py-1.5 text-caption font-semibold text-text-3 hover:bg-surface-3 hover:text-text"
                 }
               >
                 {s.label}
@@ -110,12 +110,12 @@ export function HistoryControls({
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        {members.length > 1 && (
+        {companies.length > 1 && (
           <Select
             label="회원사"
-            value={params.get("member") ?? ""}
-            onChange={(v) => setParam("member", v)}
-            options={members.map((m) => ({ value: m.id, label: m.name }))}
+            value={params.get("company") ?? ""}
+            onChange={(v) => setParam("company", v)}
+            options={companies.map((c) => ({ value: c.id, label: c.name }))}
           />
         )}
         <Select
@@ -141,23 +141,23 @@ export function HistoryControls({
         />
         <Select
           label="질의자"
-          value={params.get("user") ?? ""}
-          onChange={(v) => setParam("user", v)}
-          options={users.map((u) => ({ value: u.id, label: u.name }))}
+          value={params.get("member") ?? ""}
+          onChange={(v) => setParam("member", v)}
+          options={members.map((m) => ({ value: m.id, label: m.name }))}
         />
 
         <input
           type="date"
           value={params.get("from") ?? ""}
           onChange={(e) => setParam("from", e.target.value || undefined)}
-          className="rounded-lg border border-line bg-surface px-2.5 py-1.5 text-[12.5px] text-text-2 outline-none focus:outline-2 focus:outline-accent-line"
+          className="rounded-lg border border-line bg-surface px-2.5 py-1.5 text-caption text-text-2 outline-none focus:outline-2 focus:outline-accent-line"
         />
-        <span className="text-[12.5px] text-text-3">~</span>
+        <span className="text-caption text-text-3">~</span>
         <input
           type="date"
           value={params.get("to") ?? ""}
           onChange={(e) => setParam("to", e.target.value || undefined)}
-          className="rounded-lg border border-line bg-surface px-2.5 py-1.5 text-[12.5px] text-text-2 outline-none focus:outline-2 focus:outline-accent-line"
+          className="rounded-lg border border-line bg-surface px-2.5 py-1.5 text-caption text-text-2 outline-none focus:outline-2 focus:outline-accent-line"
         />
 
         {active.length > 0 && (
@@ -169,7 +169,7 @@ export function HistoryControls({
               if (q) next.set("q", q);
               apply(next);
             }}
-            className="cursor-pointer rounded-lg px-2.5 py-1.5 text-[12.5px] font-medium text-text-3 hover:bg-surface-3 hover:text-text"
+            className="cursor-pointer rounded-lg px-2.5 py-1.5 text-caption font-medium text-text-3 hover:bg-surface-3 hover:text-text"
           >
             필터 지우기
           </button>
@@ -195,7 +195,7 @@ function Select({
       value={value}
       onChange={(e) => onChange(e.target.value || undefined)}
       aria-label={label}
-      className={`cursor-pointer rounded-lg border px-2.5 py-1.5 text-[12.5px] outline-none focus:outline-2 focus:outline-accent-line ${
+      className={`cursor-pointer rounded-lg border px-2.5 py-1.5 text-caption outline-none focus:outline-2 focus:outline-accent-line ${
         value
           ? "border-accent-line bg-accent-soft font-semibold text-accent-deep"
           : "border-line bg-surface text-text-2"

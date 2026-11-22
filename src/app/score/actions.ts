@@ -1,8 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { prisma } from "@/lib/db";
 import { saveScore, SCORE_CRITERIA, type ScoreInput } from "@/lib/scores";
-import { currentUser } from "@/lib/session";
+import { requireAdmin } from "@/lib/auth";
 
 function readScores(formData: FormData): ScoreInput {
   const input: ScoreInput = { note: String(formData.get("note") ?? "") };
@@ -23,11 +24,17 @@ export async function scoreAction(formData: FormData) {
   const turnId = Number(formData.get("turnId"));
   if (!Number.isInteger(turnId)) return;
 
-  const user = await currentUser();
+  const user = await requireAdmin();
   await saveScore(turnId, user.id, readScores(formData));
 
   const chatId = Number(formData.get("chatId"));
-  if (Number.isInteger(chatId)) revalidatePath(`/c/${chatId}`);
+  if (Number.isInteger(chatId)) {
+    const chat = await prisma.chat.findUnique({
+      where: { id: chatId },
+      select: { publicId: true },
+    });
+    if (chat) revalidatePath(`/c/${chat.publicId}`);
+  }
   revalidatePath("/history");
   revalidatePath("/score");
 }

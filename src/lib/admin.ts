@@ -1,10 +1,10 @@
 import { prisma } from "./db";
 
-export type Role = "admin" | "member";
+export type Role = "admin" | "user";
 
 export const ROLES: { value: Role; label: string; hint: string }[] = [
   { value: "admin", label: "관리자", hint: "채점·계정·회원사 관리까지" },
-  { value: "member", label: "멤버", hint: "질의와 조회만" },
+  { value: "user", label: "사용자", hint: "질의와 조회만" },
 ];
 
 export function roleLabel(role: string) {
@@ -22,15 +22,15 @@ export async function recordAudit(
   });
 }
 
-export async function listUsers() {
-  return prisma.user.findMany({
+export async function listMembers() {
+  return prisma.member.findMany({
     orderBy: { createdAt: "asc" },
     include: { _count: { select: { chats: true, scores: true } } },
   });
 }
 
-export async function listMembersWithCounts() {
-  return prisma.member.findMany({
+export async function listCompaniesWithCounts() {
+  return prisma.company.findMany({
     orderBy: { name: "asc" },
     include: { _count: { select: { chats: true } } },
   });

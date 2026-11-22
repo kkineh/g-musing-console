@@ -36,7 +36,7 @@ export function WikiEditor({
         <button
           type="button"
           onClick={() => setEditing(true)}
-          className="cursor-pointer rounded-lg bg-surface-3 px-3.5 py-1.5 text-[13px] font-medium text-text-2 hover:bg-line hover:text-text"
+          className="cursor-pointer rounded-lg bg-surface-3 px-3.5 py-1.5 text-label font-medium text-text-2 hover:bg-line hover:text-text"
         >
           편집
         </button>
@@ -46,7 +46,7 @@ export function WikiEditor({
             type="button"
             onClick={() => setShowHistory((v) => !v)}
             aria-expanded={showHistory}
-            className="cursor-pointer rounded-lg px-3 py-1.5 text-[13px] text-text-3 hover:bg-surface-2 hover:text-text"
+            className="cursor-pointer rounded-lg px-3 py-1.5 text-label text-text-3 hover:bg-surface-2 hover:text-text"
           >
             수정 이력 {revisions.length}
           </button>
@@ -58,7 +58,7 @@ export function WikiEditor({
               {revisions.map((r) => (
                 <div
                   key={r.id}
-                  className="flex items-center gap-2.5 rounded-lg border border-line bg-surface-2 px-3 py-2 text-[12.5px]"
+                  className="flex items-center gap-2.5 rounded-lg border border-line bg-surface-2 px-3 py-2 text-caption"
                 >
                   <span className="font-mono text-text-3">
                     {formatDateTime(r.createdAt)}
@@ -69,7 +69,7 @@ export function WikiEditor({
                     <input type="hidden" name="revisionId" value={r.id} />
                     <button
                       type="submit"
-                      className="cursor-pointer rounded px-2 py-0.5 text-[12px] text-text-3 hover:bg-surface-3 hover:text-text"
+                      className="cursor-pointer rounded px-2 py-0.5 text-caption text-text-3 hover:bg-surface-3 hover:text-text"
                     >
                       되돌리기
                     </button>
@@ -95,7 +95,7 @@ export function WikiEditor({
           name="title"
           defaultValue={title}
           required
-          className="min-w-[200px] flex-1 rounded-lg border border-line bg-surface-2 px-3 py-2 text-[15px] font-semibold outline-none focus:outline-2 focus:outline-accent-line"
+          className="min-w-[200px] flex-1 rounded-lg border border-line bg-surface-2 px-3 py-2 text-lead font-semibold outline-none focus:outline-2 focus:outline-accent-line"
         />
         <input
           name="category"
@@ -103,7 +103,7 @@ export function WikiEditor({
           required
           list="wiki-categories"
           placeholder="분류"
-          className="w-[200px] rounded-lg border border-line bg-surface-2 px-3 py-2 font-mono text-[13px] outline-none focus:outline-2 focus:outline-accent-line"
+          className="w-[200px] rounded-lg border border-line bg-surface-2 px-3 py-2 font-mono text-label outline-none focus:outline-2 focus:outline-accent-line"
         />
         <datalist id="wiki-categories">
           {categories.map((c) => (
@@ -116,17 +116,17 @@ export function WikiEditor({
         name="body"
         defaultValue={body}
         rows={20}
-        className="w-full resize-y rounded-lg border border-line bg-surface-2 px-3.5 py-3 font-mono text-[13px] leading-[1.7] outline-none focus:outline-2 focus:outline-accent-line"
+        className="w-full resize-y rounded-lg border border-line bg-surface-2 px-3.5 py-3 font-mono text-label leading-[1.7] outline-none focus:outline-2 focus:outline-accent-line"
       />
 
       <div className="flex items-center gap-2">
-        <span className="mr-auto text-[12px] text-text-3">
+        <span className="mr-auto text-caption text-text-3">
           저장하면 이전 내용이 수정 이력에 남습니다. 마크다운으로 씁니다.
         </span>
         <button
           type="button"
           onClick={() => setEditing(false)}
-          className="cursor-pointer rounded-lg px-3 py-2 text-[13px] text-text-3 hover:bg-surface-2 hover:text-text"
+          className="cursor-pointer rounded-lg px-3 py-2 text-label text-text-3 hover:bg-surface-2 hover:text-text"
         >
           취소
         </button>
@@ -143,7 +143,7 @@ function Save() {
     <button
       type="submit"
       disabled={pending}
-      className="cursor-pointer rounded-lg bg-accent px-3.5 py-2 text-[13px] font-semibold text-on-accent hover:bg-accent-deep disabled:opacity-60"
+      className="cursor-pointer rounded-lg bg-accent px-3.5 py-2 text-label font-semibold text-on-accent hover:bg-accent-deep disabled:opacity-60"
     >
       {pending ? "저장 중…" : "저장"}
     </button>

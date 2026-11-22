@@ -25,11 +25,11 @@
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "react-markdown": "^10.1.0",
+    "recharts": "^3.10.1",
     "remark-gfm": "^4.0.1",
     "zod": "^4.6.5"
   },
   "devDependencies": {
-    "@scalar/cli": "^2.5.2",
     "@stoplight/prism-cli": "^5.16.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",

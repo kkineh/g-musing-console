@@ -30,14 +30,6 @@
                   "memberId": {
                     "type": "string"
                   },
-                  "type": {
-                    "enum": [
-                      "LOGIC_REVIEW",
-                      "ERROR_CAUSE"
-                    ],
-                    "type": "string",
-                    "description": "엔진이 스스로 판별하면 불필요. 협의 대상"
-                  },
                   "sessionId": {
                     "type": "string",
                     "description": "이어가기일 때만. 첫 턴에는 없다"

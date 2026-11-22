@@ -8,12 +8,12 @@ import { ScorePanel } from "./score-panel";
 
 export function TurnCard({
   turn,
-  userName,
+  memberName,
   chatId,
   chatType,
 }: {
   turn: TurnView;
-  userName: string;
+  memberName: string;
   chatId: number;
   chatType: ChatType | null;
 }) {
@@ -21,8 +21,8 @@ export function TurnCard({
     <div className="flex flex-col gap-4.5">
       <section className="rounded-2xl border border-line bg-surface px-6 py-5.5 shadow-card-sm">
         <Head
-          avatar={userName.charAt(0)}
-          who={userName}
+          avatar={memberName.charAt(0)}
+          who={memberName}
           meta={
             <>
               <Pill>{chatTypeLabel(chatType)}</Pill>
@@ -30,7 +30,7 @@ export function TurnCard({
             </>
           }
         />
-        <p className="text-[15.5px] leading-[1.68] whitespace-pre-wrap text-text">
+        <p className="text-lead leading-[1.68] whitespace-pre-wrap text-text">
           {turn.question}
         </p>
       </section>
@@ -47,9 +47,9 @@ export function TurnCard({
               />
             </svg>
           </span>
-          <span className="text-[14.5px] font-bold">에이전트</span>
+          <span className="text-body font-bold">에이전트</span>
           {turn.elapsedMs && (
-            <span className="ml-1 font-mono text-[12px] text-text-3">
+            <span className="ml-1 font-mono text-caption text-text-3">
               {formatTime(turn.createdAt)} · {formatDuration(turn.elapsedMs)} 소요
             </span>
           )}
@@ -63,13 +63,13 @@ export function TurnCard({
           )}
 
           {turn.status === "FAILED" && (
-            <div className="rounded-xl bg-danger-soft px-4 py-3.5 text-sm text-danger">
+            <div className="rounded-xl bg-danger-soft px-4 py-3.5 text-body-sm text-danger">
               {turn.error ?? "처리에 실패했습니다"}
             </div>
           )}
 
           {turn.status === "CANCELED" && (
-            <p className="text-[15px] text-text-3">취소된 질의입니다.</p>
+            <p className="text-lead text-text-3">취소된 질의입니다.</p>
           )}
 
           {turn.status === "WAITING_INPUT" && (
@@ -79,7 +79,7 @@ export function TurnCard({
           {turn.answeredInput && <Answered answered={turn.answeredInput} />}
 
           {turn.answer && (
-            <div className="text-[15.5px] leading-[1.75] whitespace-pre-wrap text-text">
+            <div className="text-lead leading-[1.75] whitespace-pre-wrap text-text">
               {turn.answer}
             </div>
           )}
@@ -88,7 +88,7 @@ export function TurnCard({
 
           {turn.references.length > 0 && (
             <div className="mt-4.5 flex flex-col gap-2">
-              <div className="text-[12px] font-bold text-text-3">
+              <div className="text-label font-semibold text-text-3">
                 근거 {turn.references.length}건 상세
               </div>
               {turn.references.map((ref) => (
@@ -97,10 +97,10 @@ export function TurnCard({
                   className="flex flex-wrap items-center gap-2.5 rounded-lg border border-line bg-bg px-3 py-2.5"
                 >
                   <span className="size-[7px] shrink-0 rounded-full bg-gray-node-line" />
-                  <span className="font-mono text-[12.5px] font-semibold text-text">
+                  <span className="font-mono text-caption font-semibold text-text">
                     {ref.locator}
                   </span>
-                  <span className="ml-auto text-right text-[12px] text-text-3">
+                  <span className="ml-auto text-right text-caption text-text-3">
                     {ref.description}
                   </span>
                 </div>
@@ -130,10 +130,10 @@ function Head({
 }) {
   return (
     <div className="mb-3 flex items-center gap-2.5">
-      <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-text text-[13px] font-bold text-surface">
+      <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-text text-label font-bold text-surface">
         {avatar}
       </span>
-      <span className="text-[14.5px] font-bold">{who}</span>
+      <span className="text-body font-bold">{who}</span>
       <span className="ml-auto flex items-center gap-2">{meta}</span>
     </div>
   );
@@ -150,8 +150,8 @@ function Pill({
     <span
       className={
         plain
-          ? "text-[12px] text-text-3"
-          : "rounded-md bg-accent-soft px-2.5 py-1 text-[11.5px] font-semibold text-accent-deep"
+          ? "text-caption text-text-3"
+          : "rounded-md bg-accent-soft px-2.5 py-1 text-tiny font-semibold text-accent-deep"
       }
     >
       {children}
@@ -162,12 +162,12 @@ function Pill({
 function Answered({ answered }: { answered: Record<string, string> }) {
   return (
     <div className="mb-4 rounded-xl border border-line bg-bg px-4 py-3.5">
-      <div className="mb-2 text-[12.5px] font-semibold text-text-3">
+      <div className="mb-2 text-label font-semibold text-text-3">
         되물어 확인한 것
       </div>
       <div className="flex flex-col gap-1.5">
         {Object.entries(answered).map(([q, a]) => (
-          <div key={q} className="text-[13.5px] text-text-2">
+          <div key={q} className="text-body-sm text-text-2">
             {q}{" "}
             <span className="font-medium text-accent-deep">{a}</span>
           </div>
@@ -182,7 +182,7 @@ function Trace({ turn }: { turn: TurnView }) {
 
   return (
     <details className="group mb-4">
-      <summary className="flex cursor-pointer list-none items-center gap-2.5 py-3 text-[13px] font-semibold text-text-2 [&::-webkit-details-marker]:hidden">
+      <summary className="flex cursor-pointer list-none items-center gap-2.5 py-3 text-label font-semibold text-text-2 [&::-webkit-details-marker]:hidden">
         <svg
           viewBox="0 0 24 24"
           fill="none"
@@ -193,7 +193,7 @@ function Trace({ turn }: { turn: TurnView }) {
           <path d="M6 9l6 6 6-6" transform="rotate(-90 12 12)" />
         </svg>
         <span>처리 단계 {turn.trace.length}개</span>
-        <span className="ml-auto rounded-md border border-line bg-bg px-2.5 py-1 font-mono text-[12px] font-bold text-text-2">
+        <span className="ml-auto rounded-md border border-line bg-bg px-2.5 py-1 font-mono text-caption font-bold text-text-2">
           {formatDuration(total)}
         </span>
       </summary>
@@ -213,14 +213,14 @@ function Trace({ turn }: { turn: TurnView }) {
             key={`${step.label}-${i}`}
             className="relative grid grid-cols-[32px_1fr_auto] items-center gap-3 py-[7px]"
           >
-            <span className="z-[1] grid size-[31px] place-items-center rounded-full border-[1.5px] border-gray-node-line bg-surface text-[11px] font-extrabold text-text-2">
+            <span className="z-[1] grid size-[31px] place-items-center rounded-full border-[1.5px] border-gray-node-line bg-surface text-tiny font-extrabold text-text-2">
               {i + 1}
             </span>
-            <span className="text-[13.5px] font-medium text-text">
+            <span className="text-body-sm font-medium text-text">
               {step.label}
               {step.detail ? ` · ${step.detail}` : ""}
             </span>
-            <span className="font-mono text-[12px] text-text-3">
+            <span className="font-mono text-caption text-text-3">
               {formatDuration(step.elapsedMs)}
             </span>
           </div>
@@ -242,8 +242,8 @@ function Usage({ turn }: { turn: TurnView }) {
   return (
     <div className="mt-5 flex flex-wrap gap-6 border-t border-line pt-4">
       {items.map(([label, value]) => (
-        <div key={label} className="font-mono text-[13px] font-semibold text-text">
-          <span className="mb-0.5 block font-sans text-[11.5px] font-semibold text-text-3">
+        <div key={label} className="font-mono text-label font-semibold text-text">
+          <span className="mb-0.5 block font-sans text-tiny font-semibold text-text-3">
             {label}
           </span>
           {value}

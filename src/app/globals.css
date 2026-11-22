@@ -23,6 +23,7 @@
   --good-soft: #e8edff;
   --gray-node-line: #9a9ca0;
   --dot: #d8d8d8;
+  --net: #d6d6d6;
   --shadow-sm: 0 1px 2px rgb(15 23 20 / 3%);
   --shadow: 0 1px 2px rgb(15 23 20 / 3%);
   --shadow-lg: 0 8px 24px rgb(15 23 20 / 8%);
@@ -52,6 +53,7 @@
     --good-soft: #1c2440;
     --gray-node-line: #6b6e73;
     --dot: #2a2c30;
+    --net: #464646;
     --shadow-sm: 0 1px 2px rgb(0 0 0 / 25%);
     --shadow: 0 1px 2px rgb(0 0 0 / 25%);
     --shadow-lg: 0 8px 24px rgb(0 0 0 / 35%);
@@ -81,6 +83,7 @@
   --good-soft: #1c2440;
   --gray-node-line: #6b6e73;
   --dot: #2a2c30;
+  --net: #464646;
   --shadow-sm: 0 1px 2px rgb(0 0 0 / 25%);
   --shadow: 0 1px 2px rgb(0 0 0 / 25%);
   --shadow-lg: 0 8px 24px rgb(0 0 0 / 35%);
@@ -105,6 +108,21 @@
 
 :root[data-theme="dark"] .logo-dark {
   display: block;
+}
+
+/* 글자 크기는 역할 토큰만 쓴다 (.claude/skills/musing-design/principles.md 역할별 글자). */
+@theme {
+  --text-micro: 10.5px;
+  --text-tiny: 11.5px;
+  --text-caption: 12.5px;
+  --text-label: 13px;
+  --text-body-sm: 14px;
+  --text-body: 14.5px;
+  --text-lead: 15.5px;
+  --text-heading: 18px;
+  --text-title-sm: 22px;
+  --text-title: 27px;
+  --text-display: 30px;
 }
 
 @theme inline {
@@ -143,7 +161,7 @@ body {
   background-color: var(--bg);
   color: var(--text);
   font-family: var(--font-sans);
-  font-size: 14.5px;
+  font-size: var(--text-body);
   line-height: 1.6;
 }
 
@@ -152,5 +170,13 @@ body {
     transition-property: color, background-color, border-color, box-shadow, transform;
     transition-duration: 0.15s;
     transition-timing-function: ease;
+  }
+}
+
+/* Tailwind v4는 버튼 커서를 기본 화살표로 둔다. 누를 수 있는 버튼은 여기서 한 번만 손가락 커서를 준다. */
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
   }
 }

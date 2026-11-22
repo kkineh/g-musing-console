@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { restoreRevision, saveWikiDoc } from "@/lib/wiki";
 import { recordAudit } from "@/lib/admin";
-import { currentUser } from "@/lib/session";
+import { requireMember } from "@/lib/auth";
 
 export async function saveDocAction(formData: FormData) {
   const slug = String(formData.get("slug") ?? "");
@@ -12,7 +12,7 @@ export async function saveDocAction(formData: FormData) {
   const body = String(formData.get("body") ?? "");
   if (!slug || !title || !category) return;
 
-  const user = await currentUser();
+  const user = await requireMember();
   const saved = await saveWikiDoc(slug, user.id, { title, category, body });
   if (!saved) return;
 
@@ -24,7 +24,7 @@ export async function restoreRevisionAction(formData: FormData) {
   const id = Number(formData.get("revisionId"));
   if (!Number.isInteger(id)) return;
 
-  const user = await currentUser();
+  const user = await requireMember();
   const restored = await restoreRevision(id, user.id);
   if (!restored) return;
 

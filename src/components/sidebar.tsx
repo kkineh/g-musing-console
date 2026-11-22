@@ -28,6 +28,18 @@ const WORKSPACE = [
 
 const ADMIN = [
   {
+    href: "/admin",
+    label: "대시보드",
+    icon: (
+      <>
+        <rect x="2" y="2.5" width="5" height="5" rx="1" />
+        <rect x="9" y="2.5" width="5" height="5" rx="1" />
+        <rect x="2" y="9" width="5" height="4.5" rx="1" />
+        <rect x="9" y="9" width="5" height="4.5" rx="1" />
+      </>
+    ),
+  },
+  {
     href: "/score",
     label: "채점 대기",
     icon: <path d="M3 13.5V9M8 13.5V4.5M13 13.5V7" />,
@@ -45,7 +57,7 @@ const ADMIN = [
     ),
   },
   {
-    href: "/admin/members",
+    href: "/admin/companies",
     label: "회원사 관리",
     icon: (
       <>
@@ -56,11 +68,13 @@ const ADMIN = [
   },
 ];
 
+const EXACT = new Set(["/", "/admin"]);
+
 function isActive(pathname: string, href: string) {
-  return href === "/" ? pathname === "/" : pathname.startsWith(href);
+  return EXACT.has(href) ? pathname === href : pathname.startsWith(href);
 }
 
-export function Sidebar() {
+export function Sidebar({ isAdmin }: { isAdmin: boolean }) {
   const pathname = usePathname();
 
   return (
@@ -85,22 +99,24 @@ export function Sidebar() {
           priority
           className="logo-dark shrink-0"
         />
-        <span className="text-[14.5px] font-bold tracking-[-0.01em]">
+        <span className="text-body font-bold tracking-[-0.01em]">
           musing
         </span>
       </Link>
 
       <nav className="flex-1 overflow-y-auto px-3 py-4">
         <div>
-          <div className="mb-1.5 px-2.5 text-[10.5px] font-bold tracking-[0.05em] text-text-3 uppercase">
+          <div className="mb-1.5 px-2.5 text-micro font-bold tracking-[0.05em] text-text-3 uppercase">
             워크스페이스
           </div>
           <NavItems items={WORKSPACE} pathname={pathname} />
           <SidebarWikiItem />
         </div>
-        <div className="mt-5">
-          <NavGroup label="관리" items={ADMIN} pathname={pathname} />
-        </div>
+        {isAdmin && (
+          <div className="mt-5">
+            <NavGroup label="관리" items={ADMIN} pathname={pathname} />
+          </div>
+        )}
       </nav>
 
       <div className="flex shrink-0 items-center border-t border-line-soft px-3 py-2.5">
@@ -121,7 +137,7 @@ function NavGroup({
 }) {
   return (
     <div>
-      <div className="mb-1.5 px-2.5 text-[10.5px] font-bold tracking-[0.05em] text-text-3 uppercase">
+      <div className="mb-1.5 px-2.5 text-micro font-bold tracking-[0.05em] text-text-3 uppercase">
         {label}
       </div>
       <NavItems items={items} pathname={pathname} />
@@ -147,8 +163,8 @@ function NavItems({
             aria-current={active ? "page" : undefined}
             className={
               active
-                ? "mb-[1px] flex items-center gap-2.5 rounded-lg bg-accent-soft px-2.5 py-[7px] text-[13.5px] font-semibold text-accent-deep"
-                : "mb-[1px] flex items-center gap-2.5 rounded-lg px-2.5 py-[7px] text-[13.5px] font-medium text-text-2 hover:bg-surface-3 hover:text-text"
+                ? "mb-[1px] flex items-center gap-2.5 rounded-lg bg-accent-soft px-2.5 py-[7px] text-body-sm font-semibold text-accent-deep"
+                : "mb-[1px] flex items-center gap-2.5 rounded-lg px-2.5 py-[7px] text-body-sm font-medium text-text-2 hover:bg-surface-3 hover:text-text"
             }
           >
             <svg

@@ -10,10 +10,14 @@ export function HistoryList({
   initialRows,
   initialCursor,
   query,
+  meId,
+  isAdmin,
 }: {
   initialRows: HistoryRow[];
   initialCursor: number | null;
   query: string;
+  meId: string;
+  isAdmin: boolean;
 }) {
   const params = useSearchParams();
   const key = params.toString();
@@ -54,7 +58,7 @@ export function HistoryList({
 
   if (rows.length === 0) {
     return (
-      <p className="mt-6 text-[14.5px] text-text-3">
+      <p className="mt-6 text-body text-text-3">
         {query
           ? `"${query}"에 해당하는 질의가 없습니다.`
           : "조건에 맞는 질의가 없습니다."}
@@ -65,11 +69,25 @@ export function HistoryList({
   return (
     <div className="flex flex-col gap-2.5">
       {rows.map((row) => (
-        <HistoryRowCard key={row.id} row={row} highlight={query} />
+        <HistoryRowCard
+          key={row.id}
+          row={row}
+          highlight={query}
+          isAdmin={isAdmin}
+          canDelete={!row.deleted && (isAdmin || row.memberId === meId)}
+          onDeleted={() =>
+            /// 관리자는 삭제된 대화도 보므로 행을 빼지 않고 표시만 바꾼다.
+            setRows((prev) =>
+              isAdmin
+                ? prev.map((r) => (r.id === row.id ? { ...r, deleted: true } : r))
+                : prev.filter((r) => r.id !== row.id),
+            )
+          }
+        />
       ))}
 
       {cursor !== null && (
-        <div ref={sentinel} className="py-4 text-center text-[13px] text-text-3">
+        <div ref={sentinel} className="py-4 text-center text-label text-text-3">
           {loading ? "불러오는 중…" : ""}
         </div>
       )}

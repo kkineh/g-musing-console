@@ -1,5 +1,6 @@
 "use server";
 
+import { requireMember } from "@/lib/auth";
 import { searchHistory } from "@/lib/chats";
 import { searchWikiDocs } from "@/lib/wiki";
 import { chatTypeLabel } from "@/lib/engine";
@@ -16,17 +17,22 @@ export async function globalSearchAction(
 ): Promise<GlobalSearchResult> {
   const q = query.trim();
   if (!q) return { chats: [], docs: [] };
+  const me = await requireMember();
 
   const [history, wiki] = await Promise.all([
-    searchHistory({ query: q, limit: 6 }),
+    searchHistory({
+      query: q,
+      limit: 6,
+      includeDeleted: me.role === "admin",
+    }),
     searchWikiDocs(q),
   ]);
 
   return {
     chats: history.rows.map((row) => ({
-      href: `/c/${row.id}`,
+      href: `/c/${row.publicId}`,
       title: row.title,
-      sub: `${chatNo(row.id)} · ${chatTypeLabel(row.type)} · ${row.memberName}`,
+      sub: `${chatNo(row.id)} · ${chatTypeLabel(row.type)} · ${row.companyName ?? "공통"}`,
     })),
     docs: wiki.slice(0, 6).map((doc) => ({
       href: `/wiki/${doc.category

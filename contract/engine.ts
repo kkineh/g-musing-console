@@ -72,9 +72,6 @@ export const process = oc
     z.object({
       question: z.string(),
       memberId: z.string().meta({ example: "hll" }),
-      type: ChatType.optional().meta({
-        description: "엔진이 스스로 판별하면 불필요. 협의 대상",
-      }),
       sessionId: z.string().optional().meta({
         description: "이어가기일 때만. 첫 턴에는 없다",
       }),
