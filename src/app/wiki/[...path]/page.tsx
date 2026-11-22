@@ -55,5 +55,5 @@ export default async function WikiPathPage({
   if (!node) notFound();
 
   const docs = await categoryDocs(path);
-  return <WikiDocList path={path} docs={docs} />;
+  return <WikiDocList path={path} docs={docs} node={node} />;
 }

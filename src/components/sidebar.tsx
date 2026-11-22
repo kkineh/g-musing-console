@@ -99,14 +99,14 @@ export function Sidebar({ isAdmin }: { isAdmin: boolean }) {
           priority
           className="logo-dark shrink-0"
         />
-        <span className="text-[14.5px] font-bold tracking-[-0.01em]">
+        <span className="text-body font-bold tracking-[-0.01em]">
           musing
         </span>
       </Link>
 
       <nav className="flex-1 overflow-y-auto px-3 py-4">
         <div>
-          <div className="mb-1.5 px-2.5 text-[10.5px] font-bold tracking-[0.05em] text-text-3 uppercase">
+          <div className="mb-1.5 px-2.5 text-micro font-bold tracking-[0.05em] text-text-3 uppercase">
             워크스페이스
           </div>
           <NavItems items={WORKSPACE} pathname={pathname} />
@@ -137,7 +137,7 @@ function NavGroup({
 }) {
   return (
     <div>
-      <div className="mb-1.5 px-2.5 text-[10.5px] font-bold tracking-[0.05em] text-text-3 uppercase">
+      <div className="mb-1.5 px-2.5 text-micro font-bold tracking-[0.05em] text-text-3 uppercase">
         {label}
       </div>
       <NavItems items={items} pathname={pathname} />
@@ -163,8 +163,8 @@ function NavItems({
             aria-current={active ? "page" : undefined}
             className={
               active
-                ? "mb-[1px] flex items-center gap-2.5 rounded-lg bg-accent-soft px-2.5 py-[7px] text-[13.5px] font-semibold text-accent-deep"
-                : "mb-[1px] flex items-center gap-2.5 rounded-lg px-2.5 py-[7px] text-[13.5px] font-medium text-text-2 hover:bg-surface-3 hover:text-text"
+                ? "mb-[1px] flex items-center gap-2.5 rounded-lg bg-accent-soft px-2.5 py-[7px] text-body-sm font-semibold text-accent-deep"
+                : "mb-[1px] flex items-center gap-2.5 rounded-lg px-2.5 py-[7px] text-body-sm font-medium text-text-2 hover:bg-surface-3 hover:text-text"
             }
           >
             <svg

@@ -17,6 +17,7 @@ function evidenceX(index: number, count: number) {
 }
 
 function splitLabel(locator: string): [string, string | null] {
+  locator = locator.slice(locator.lastIndexOf("/") + 1);
   if (locator.length <= 12) return [locator, null];
   const mid = Math.ceil(locator.length / 2);
   const breakAt = locator.lastIndexOf("_", mid) > 2 ? locator.lastIndexOf("_", mid) + 1 : mid;
@@ -29,8 +30,8 @@ export function EvidenceMap({ references }: { references: Reference[] }) {
 
   return (
     <div className="mt-5.5 border-t border-dashed border-line-soft pt-5">
-      <div className="mb-4 text-[12px] font-bold text-text-3">
-        근거 지도 — 위에서 아래로: 질문 → 근거 {references.length}건 → 답변
+      <div className="mb-4 text-label font-semibold text-text-3">
+        근거 지도 — 위에서 아래로: 질의 → 근거 {references.length}건 → 답변
       </div>
       <svg
         viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
@@ -75,7 +76,7 @@ export function EvidenceMap({ references }: { references: Reference[] }) {
           fontWeight={700}
           className="fill-surface"
         >
-          질문
+          질의
         </text>
 
         {/* evidence nodes */}

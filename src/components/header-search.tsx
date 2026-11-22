@@ -25,7 +25,7 @@ export function HeaderSearch() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="mx-auto flex w-full max-w-[420px] cursor-pointer items-center gap-2 rounded-lg border border-line bg-surface-2 px-3 py-1.5 text-left text-[13px] text-text-3 hover:border-gray-node-line hover:text-text-2"
+        className="mx-auto flex w-full max-w-[420px] cursor-pointer items-center gap-2 rounded-lg border border-line bg-surface-2 px-3 py-1.5 text-left text-label text-text-3 hover:border-gray-node-line hover:text-text-2"
       >
         <svg
           viewBox="0 0 16 16"
@@ -38,7 +38,7 @@ export function HeaderSearch() {
           <path d="M10.5 10.5L14 14" />
         </svg>
         <span className="flex-1">전체 검색</span>
-        <kbd className="rounded border border-line bg-surface px-1.5 py-0.5 font-mono text-[10px] text-text-3">
+        <kbd className="rounded border border-line bg-surface px-1.5 py-0.5 font-mono text-micro text-text-3">
           ⌘K
         </kbd>
       </button>
@@ -117,24 +117,24 @@ function SearchDialog({ onClose }: { onClose: () => void }) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="처리 이력, Wiki 검색"
-            className="flex-1 bg-transparent text-[14.5px] text-text outline-none placeholder:text-text-3"
+            className="flex-1 bg-transparent text-body-sm text-text outline-none placeholder:text-text-3"
           />
-          <kbd className="rounded border border-line px-1.5 py-0.5 font-mono text-[10.5px] text-text-3">
+          <kbd className="rounded border border-line px-1.5 py-0.5 font-mono text-micro text-text-3">
             esc
           </kbd>
         </div>
 
         <div className="max-h-[420px] overflow-y-auto p-1.5">
           {!needle ? (
-            <p className="px-3 py-6 text-center text-[13.5px] text-text-3">
+            <p className="px-3 py-6 text-center text-body-sm text-text-3">
               검색어를 입력하세요.
             </p>
           ) : loading ? (
-            <p className="px-3 py-6 text-center text-[13.5px] text-text-3">
+            <p className="px-3 py-6 text-center text-body-sm text-text-3">
               검색 중…
             </p>
           ) : !hasResults ? (
-            <p className="px-3 py-6 text-center text-[13.5px] text-text-3">
+            <p className="px-3 py-6 text-center text-body-sm text-text-3">
               해당하는 결과가 없습니다.
             </p>
           ) : (
@@ -149,11 +149,11 @@ function SearchDialog({ onClose }: { onClose: () => void }) {
                       className="flex items-start justify-between rounded-lg px-3 py-2.5 text-text-2 hover:bg-surface-2"
                     >
                       <span className="min-w-0 flex-1">
-                        <span className="line-clamp-1 block text-[14px] font-medium">
+                        <span className="line-clamp-1 block text-body-sm font-medium">
                           {c.title}
                         </span>
                       </span>
-                      <span className="ml-3 shrink-0 font-mono text-[11.5px] text-text-3">
+                      <span className="ml-3 shrink-0 font-mono text-caption text-text-3">
                         {c.sub}
                       </span>
                     </Link>
@@ -171,16 +171,16 @@ function SearchDialog({ onClose }: { onClose: () => void }) {
                       className="flex items-start justify-between rounded-lg px-3 py-2.5 text-text-2 hover:bg-surface-2"
                     >
                       <span className="min-w-0 flex-1">
-                        <span className="block text-[14px] font-medium">
+                        <span className="block text-body-sm font-medium">
                           {d.title}
                         </span>
                         {d.excerpt && (
-                          <span className="mt-0.5 line-clamp-1 block text-[12px] text-text-3">
+                          <span className="mt-0.5 line-clamp-1 block text-caption text-text-3">
                             {d.excerpt}
                           </span>
                         )}
                       </span>
-                      <span className="ml-3 shrink-0 text-[12px] text-text-3">
+                      <span className="ml-3 shrink-0 text-caption text-text-3">
                         {d.sub}
                       </span>
                     </Link>
@@ -204,7 +204,7 @@ function ResultGroup({
 }) {
   return (
     <div className="mb-1 last:mb-0">
-      <div className="px-3 pt-2 pb-1 text-[11px] font-bold tracking-[0.04em] text-text-3 uppercase">
+      <div className="px-3 pt-2 pb-1 text-label font-semibold text-text-3">
         {label}
       </div>
       {children}

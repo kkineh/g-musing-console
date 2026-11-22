@@ -171,7 +171,7 @@ function CompanyPicker({
     <div ref={boxRef} className="relative">
       {/* 선택을 지우는 버튼이 트리거 안에 들어가면 button 중첩이 되므로, 테두리를
           공유하는 한 덩어리로 보이게 두 버튼을 나란히 둔다. */}
-      <div className="flex items-center rounded-lg border border-line text-[12.5px] font-semibold">
+      <div className="flex items-center rounded-lg border border-line text-caption font-semibold">
         <button
           type="button"
           onClick={toggle}
@@ -249,12 +249,12 @@ function CompanyPicker({
               }
             }}
             placeholder="회원사 검색"
-            className="block w-full border-b border-line bg-transparent px-3 py-2.5 text-[13px] text-text outline-none placeholder:text-text-3"
+            className="block w-full border-b border-line bg-transparent px-3 py-2.5 text-label text-text outline-none placeholder:text-text-3"
           />
 
           <div role="listbox" className="max-h-[220px] overflow-y-auto py-1">
             {matches.length === 0 ? (
-              <div className="px-3 py-2.5 text-[12.5px] text-text-3">
+              <div className="px-3 py-2.5 text-caption text-text-3">
                 검색 결과가 없습니다
               </div>
             ) : (
@@ -268,12 +268,12 @@ function CompanyPicker({
                   onClick={() => choose(c.id)}
                   className={
                     i === active
-                      ? "flex w-full cursor-pointer items-center justify-between gap-3 bg-surface-3 px-3 py-2 text-left text-[13px] text-text"
-                      : "flex w-full cursor-pointer items-center justify-between gap-3 px-3 py-2 text-left text-[13px] text-text-2"
+                      ? "flex w-full cursor-pointer items-center justify-between gap-3 bg-surface-3 px-3 py-2 text-left text-label text-text"
+                      : "flex w-full cursor-pointer items-center justify-between gap-3 px-3 py-2 text-left text-label text-text-2"
                   }
                 >
                   <span className="truncate">{c.name}</span>
-                  <span className="shrink-0 font-mono text-[11px] text-text-3">
+                  <span className="shrink-0 font-mono text-tiny text-text-3">
                     {c.id}
                   </span>
                 </button>
@@ -310,7 +310,7 @@ function Field({ placeholder }: { placeholder: string }) {
           ref.current?.form?.requestSubmit();
         }
       }}
-      className="block min-h-[52px] w-full resize-none bg-transparent px-4 pt-3.5 pb-1.5 text-[14.5px] leading-[1.7] text-text outline-none placeholder:text-text-3 disabled:opacity-60"
+      className="block min-h-[52px] w-full resize-none bg-transparent px-4 pt-3.5 pb-1.5 text-body leading-[1.7] text-text outline-none placeholder:text-text-3 disabled:opacity-60"
     />
   );
 }
@@ -322,7 +322,7 @@ function Submit() {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex items-center gap-2 rounded-lg bg-accent px-3.5 py-2 text-[13px] font-semibold text-on-accent hover:bg-accent-deep active:scale-[0.98] disabled:opacity-60"
+      className="inline-flex items-center gap-2 rounded-lg bg-accent px-3.5 py-2 text-label font-semibold text-on-accent hover:bg-accent-deep active:scale-[0.98] disabled:opacity-60"
     >
       {pending ? "엔진 처리 중…" : "보내기"}
     </button>

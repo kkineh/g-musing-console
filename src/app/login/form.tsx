@@ -15,7 +15,7 @@ export function LoginForm({ next }: { next: string }) {
       <input type="hidden" name="next" value={next} />
 
       <label className="mb-3.5 block">
-        <span className="mb-1.5 block text-[12.5px] font-medium text-text-2">
+        <span className="mb-1.5 block text-caption font-medium text-text-2">
           아이디
         </span>
         <input
@@ -23,12 +23,12 @@ export function LoginForm({ next }: { next: string }) {
           autoComplete="username"
           autoFocus
           required
-          className="w-full rounded-lg border border-line bg-surface-2 px-3 py-2.5 text-[14px] outline-none focus:outline-2 focus:outline-accent-line"
+          className="w-full rounded-lg border border-line bg-surface-2 px-3 py-2.5 text-body-sm outline-none focus:outline-2 focus:outline-accent-line"
         />
       </label>
 
       <label className="block">
-        <span className="mb-1.5 block text-[12.5px] font-medium text-text-2">
+        <span className="mb-1.5 block text-caption font-medium text-text-2">
           비밀번호
         </span>
         <input
@@ -36,14 +36,14 @@ export function LoginForm({ next }: { next: string }) {
           type="password"
           autoComplete="current-password"
           required
-          className="w-full rounded-lg border border-line bg-surface-2 px-3 py-2.5 text-[14px] outline-none focus:outline-2 focus:outline-accent-line"
+          className="w-full rounded-lg border border-line bg-surface-2 px-3 py-2.5 text-body-sm outline-none focus:outline-2 focus:outline-accent-line"
         />
       </label>
 
       {error && (
         <p
           role="alert"
-          className="mt-3.5 rounded-lg bg-danger-soft px-3 py-2.5 text-[13px] leading-[1.6] text-danger"
+          className="mt-3.5 rounded-lg bg-danger-soft px-3 py-2.5 text-label leading-[1.6] text-danger"
         >
           {error}
         </p>
@@ -61,7 +61,7 @@ function Submit() {
     <button
       type="submit"
       disabled={pending}
-      className="mt-5 w-full cursor-pointer rounded-lg bg-accent px-4 py-2.5 text-[14px] font-semibold text-on-accent hover:bg-accent-deep disabled:opacity-60"
+      className="mt-5 w-full cursor-pointer rounded-lg bg-accent px-4 py-2.5 text-body-sm font-semibold text-on-accent hover:bg-accent-deep disabled:opacity-60"
     >
       {pending ? "확인 중…" : "로그인"}
     </button>

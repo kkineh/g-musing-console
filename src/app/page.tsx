@@ -16,10 +16,10 @@ export default async function AskPage() {
   return (
     <div className="mx-auto max-w-[760px]">
       <div className="mb-6">
-        <h1 className="mb-1.5 text-[27px] leading-[1.25] font-bold tracking-[-0.03em]">
+        <h1 className="mb-1.5 text-title leading-[1.25] font-bold tracking-[-0.03em]">
           무엇을 확인할까요
         </h1>
-        <p className="text-[14.5px] text-text-3">
+        <p className="text-body text-text-3">
           SR 내용을 그대로 붙여넣으면 저장소와 DB를 읽어 근거와 함께 답합니다.
         </p>
       </div>
@@ -28,7 +28,7 @@ export default async function AskPage() {
 
       {recent.length > 0 && (
         <div className="mt-10">
-          <h2 className="mb-3 text-[13px] font-semibold text-text-3">
+          <h2 className="mb-3 text-label font-semibold text-text-3">
             최근 질의
           </h2>
           <div className="flex flex-col gap-2">
@@ -39,14 +39,14 @@ export default async function AskPage() {
                 className="rounded-2xl border border-line bg-surface px-5 py-3.5 shadow-card-sm hover:border-gray-node-line"
               >
                 <div className="mb-1 flex items-center gap-2.5">
-                  <span className="font-mono text-[13px] text-text-3">
+                  <span className="font-mono text-label text-text-3">
                     {chatNo(chat.id)}
                   </span>
-                  <span className="rounded-md bg-surface-3 px-2.5 py-0.5 text-[12.5px] text-text-2">
+                  <span className="rounded-md bg-surface-3 px-2.5 py-0.5 text-caption text-text-2">
                     {chat.company?.name ?? "공통"}
                   </span>
                 </div>
-                <div className="line-clamp-1 text-[14.5px] text-text-2">
+                <div className="line-clamp-1 text-body text-text-2">
                   {chat.title ?? chat.turns[0]?.question ?? "제목 없음"}
                 </div>
               </Link>

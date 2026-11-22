@@ -26,7 +26,7 @@ export function AskBackForm({
           <circle cx="8" cy="8" r="6.5" />
           <path d="M6.2 6a1.9 1.9 0 113.1 1.5c-.6.4-1.3.8-1.3 1.6M8 11.5v.2" />
         </svg>
-        <span className="text-sm font-semibold text-warn">
+        <span className="text-body-sm font-semibold text-warn">
           확인이 필요합니다
         </span>
       </div>
@@ -34,7 +34,7 @@ export function AskBackForm({
       <div className="flex flex-col gap-4.5">
         {questions.map((q, qi) => (
           <fieldset key={q.question} className="border-0 p-0">
-            <legend className="mb-2.5 text-[15px] leading-[1.6] text-text">
+            <legend className="mb-2.5 text-lead leading-[1.6] text-text">
               {q.question}
             </legend>
             <div className="flex flex-col gap-2">
@@ -51,10 +51,10 @@ export function AskBackForm({
                     className="mt-1 accent-[var(--accent)]"
                   />
                   <span>
-                    <span className="block text-sm font-medium text-text">
+                    <span className="block text-body-sm font-medium text-text">
                       {opt.label}
                     </span>
-                    <span className="block text-[13px] text-text-3">
+                    <span className="block text-label text-text-3">
                       {opt.description}
                     </span>
                   </span>
@@ -77,7 +77,7 @@ function Submit() {
     <button
       type="submit"
       disabled={pending}
-      className="mt-4 rounded-lg bg-accent px-4 py-2 text-[13.5px] font-medium text-on-accent hover:opacity-90 disabled:opacity-60"
+      className="mt-4 rounded-lg bg-accent px-4 py-2 text-label font-semibold text-on-accent hover:opacity-90 disabled:opacity-60"
     >
       {pending ? "엔진 처리 중…" : "답하고 이어가기"}
     </button>

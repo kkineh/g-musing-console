@@ -22,13 +22,13 @@ export default async function ChatPage({ params }: PageProps<"/c/[id]">) {
   return (
     <div className="mx-auto max-w-[760px]">
       <div className="mb-6 flex items-center gap-2.5">
-        <span className="font-mono text-[13px] text-text-3">
+        <span className="font-mono text-label text-text-3">
           {chatNo(chat.id)}
         </span>
-        <span className="rounded-md bg-surface-3 px-2.5 py-0.5 text-[12.5px] text-text-2">
+        <span className="rounded-md bg-surface-3 px-2.5 py-0.5 text-caption text-text-2">
           {chat.companyName ?? "공통"}
         </span>
-        <span className="rounded-md bg-surface-3 px-2.5 py-0.5 text-[12.5px] text-text-2">
+        <span className="rounded-md bg-surface-3 px-2.5 py-0.5 text-caption text-text-2">
           {chatTypeLabel(chat.type)}
         </span>
       </div>

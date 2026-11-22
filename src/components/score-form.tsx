@@ -47,12 +47,12 @@ export function ScoreForm({
           return (
             <div key={c.key}>
               <div className="mb-1.5 flex items-baseline gap-2">
-                <span className="text-[13.5px] font-medium text-text">
+                <span className="text-body-sm font-medium text-text">
                   {c.label}
                 </span>
-                <span className="text-[12px] text-text-3">{c.hint}</span>
-                <span className="ml-auto font-mono text-[13px] font-bold tabular-nums text-accent-deep">
-                  {off ? "—" : value}
+                <span className="text-caption text-text-3">{c.hint}</span>
+                <span className="ml-auto font-mono text-label font-bold tabular-nums text-accent-deep">
+                  {off ? "—" : `${value}점`}
                 </span>
               </div>
 
@@ -69,7 +69,7 @@ export function ScoreForm({
                   }
                   className="h-1.5 flex-1 cursor-pointer appearance-none rounded-full bg-surface-3 accent-[var(--accent)] disabled:opacity-40"
                 />
-                <label className="flex cursor-pointer items-center gap-1.5 text-[12px] text-text-3">
+                <label className="flex cursor-pointer items-center gap-1.5 text-caption text-text-3">
                   <input
                     type="checkbox"
                     checked={off}
@@ -100,17 +100,17 @@ export function ScoreForm({
         rows={2}
         defaultValue={initial?.note ?? ""}
         placeholder="채점 사유 (선택)"
-        className="w-full resize-none rounded-lg border border-line bg-surface-2 px-3 py-2 text-[13.5px] text-text outline-none placeholder:text-text-3 focus:outline-2 focus:outline-accent-line"
+        className="w-full resize-none rounded-lg border border-line bg-surface-2 px-3 py-2 text-body-sm text-text outline-none placeholder:text-text-3 focus:outline-2 focus:outline-accent-line"
       />
 
       <div className="flex items-center gap-3">
-        <span className="text-[13px] text-text-3">
+        <span className="text-label text-text-3">
           평균{" "}
-          <span className="font-mono text-[15px] font-bold text-accent-deep">
-            {scoredCount ? average.toFixed(1) : "—"}
+          <span className="font-mono text-lead font-bold text-accent-deep">
+            {scoredCount ? `${average.toFixed(1)}점` : "—"}
           </span>
           {scoredCount < SCORE_CRITERIA.length && (
-            <span className="ml-1.5 text-[12px]">
+            <span className="ml-1.5 text-caption">
               {SCORE_CRITERIA.length - scoredCount}개 제외
             </span>
           )}
@@ -128,7 +128,7 @@ function Submit({ label }: { label: string }) {
     <button
       type="submit"
       disabled={pending}
-      className="ml-auto rounded-lg bg-accent px-3.5 py-2 text-[13px] font-semibold text-on-accent hover:bg-accent-deep disabled:opacity-60"
+      className="ml-auto rounded-lg bg-accent px-3.5 py-2 text-label font-semibold text-on-accent hover:bg-accent-deep disabled:opacity-60"
     >
       {pending ? "저장 중…" : label}
     </button>

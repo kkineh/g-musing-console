@@ -65,14 +65,14 @@ export default async function DashboardPage() {
     <div>
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="mb-1.5 text-[27px] leading-[1.25] font-bold tracking-[-0.03em]">
+          <h1 className="mb-1.5 text-title leading-[1.25] font-bold tracking-[-0.03em]">
             대시보드
           </h1>
-          <p className="text-[14.5px] text-text-3">
+          <p className="text-body text-text-3">
             엔진 상태와 처리 현황, 답변 품질을 함께 봅니다.
           </p>
         </div>
-        <span className="rounded-lg bg-surface-3 px-2.5 py-1 text-[12px] font-medium text-text-2">
+        <span className="rounded-lg bg-surface-3 px-2.5 py-1 text-caption font-medium text-text-2">
           최근 {WINDOW_DAYS}일 기준
         </span>
       </div>
@@ -109,8 +109,8 @@ export default async function DashboardPage() {
                 accent
               />
               {settled > 0 && (
-                <span className="text-[12.5px] text-text-3">
-                  완료 {result.done} / 실패 {result.failed}
+                <span className="text-caption text-text-3">
+                  완료 {result.done}건 / 실패 {result.failed}건
                 </span>
               )}
             </div>
@@ -131,24 +131,24 @@ export default async function DashboardPage() {
             value={load.medianMs === null ? "—" : formatDuration(load.medianMs)}
             note={
               load.p90Ms === null
-                ? "완료된 턴 없음"
+                ? "완료된 질의 없음"
                 : `p90 ${formatDuration(load.p90Ms)}`
             }
           />
           <Stat
             label="평균 토큰"
-            value={load.avgTokens === null ? "—" : fmt(Math.round(load.avgTokens))}
-            note="턴당"
+            value={load.avgTokens === null ? "—" : `${fmt(Math.round(load.avgTokens))}개`}
+            note="질의당"
           />
           <Stat
             label="평균 파일 읽기"
-            value={load.avgFilesRead === null ? "—" : load.avgFilesRead.toFixed(1)}
-            note="턴당"
+            value={load.avgFilesRead === null ? "—" : `${load.avgFilesRead.toFixed(1)}개`}
+            note="질의당"
           />
           <Stat
             label="평균 DB 조회"
-            value={load.avgDbQueries === null ? "—" : load.avgDbQueries.toFixed(1)}
-            note="턴당"
+            value={load.avgDbQueries === null ? "—" : `${load.avgDbQueries.toFixed(1)}건`}
+            note="질의당"
           />
         </div>
         <Card>
@@ -163,14 +163,14 @@ export default async function DashboardPage() {
             <CardLabel>되묻기</CardLabel>
             <div className="flex items-baseline gap-2.5">
               <Metric value={askRate === null ? "—" : `${askRate.toFixed(0)}%`} />
-              <span className="text-[12.5px] text-text-3">
-                되물은 턴 {asked.turnsWithQuestion} / {asked.totalTurns} · 답변받음{" "}
-                {asked.answered}
+              <span className="text-caption text-text-3">
+                되물은 질의 {asked.turnsWithQuestion} / {asked.totalTurns}건 · 답변받음{" "}
+                {asked.answered}건
               </span>
             </div>
-            <p className="mt-3 text-[12.5px] leading-[1.65] text-text-3">
+            <p className="mt-3 text-caption leading-[1.65] text-text-3">
               너무 잦으면 쓰기 번거롭고, 아예 없으면 엔진이 틀린 가정을 그대로
-              밀고 간다.
+              밀고 갑니다.
             </p>
           </Card>
 
@@ -220,7 +220,7 @@ export default async function DashboardPage() {
                 {companies.map((c) => (
                   <div
                     key={c.id}
-                    className="flex items-center justify-between gap-3 text-[13px]"
+                    className="flex items-center justify-between gap-3 text-label"
                   >
                     <span className="truncate text-text-2">{c.name}</span>
                     <span className="shrink-0 font-mono text-text-3 tabular-nums">
@@ -241,13 +241,13 @@ export default async function DashboardPage() {
 
       <Section title="누적">
         <div className="grid gap-3.5 sm:grid-cols-3">
-          <Stat label="전체 처리" value={fmt(summary.chatCount)} note="누적 질의" />
+          <Stat label="전체 처리" value={`${fmt(summary.chatCount)}건`} note="누적 질의" />
           <Stat
             label="전체 평균 점수"
-            value={summary.averageScore?.toFixed(1) ?? "—"}
-            note={summary.averageScore === null ? "채점 없음" : "채점된 턴 기준"}
+            value={summary.averageScore == null ? "—" : `${summary.averageScore.toFixed(1)}점`}
+            note={summary.averageScore === null ? "채점 없음" : "채점된 질의 기준"}
           />
-          <Stat label="최근 7일" value={fmt(summary.weekCount)} note="질의 건수" />
+          <Stat label="최근 7일" value={`${fmt(summary.weekCount)}건`} note="질의 건수" />
         </div>
       </Section>
     </div>
@@ -267,7 +267,7 @@ function Section({
 }) {
   return (
     <section className="mb-7">
-      <h2 className="mb-2.5 text-[11px] font-bold tracking-[0.05em] text-text-3 uppercase">
+      <h2 className="mb-2.5 text-label font-semibold text-text-3">
         {title}
       </h2>
       {children}
@@ -285,7 +285,7 @@ function Card({ children }: { children: React.ReactNode }) {
 
 function CardLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mb-3.5 text-[13px] font-semibold text-text-2">
+    <div className="mb-3.5 text-label font-semibold text-text-2">
       {children}
     </div>
   );
@@ -294,7 +294,7 @@ function CardLabel({ children }: { children: React.ReactNode }) {
 function Metric({ value, accent }: { value: string; accent?: boolean }) {
   return (
     <span
-      className={`font-mono text-[30px] leading-none font-bold tracking-[-0.03em] tabular-nums ${
+      className={`font-mono text-display leading-none font-bold tracking-[-0.03em] tabular-nums ${
         accent ? "text-accent-deep" : "text-text"
       }`}
     >
@@ -304,7 +304,7 @@ function Metric({ value, accent }: { value: string; accent?: boolean }) {
 }
 
 function Empty({ children }: { children: React.ReactNode }) {
-  return <p className="py-2 text-[13px] text-text-3">{children}</p>;
+  return <p className="py-2 text-label text-text-3">{children}</p>;
 }
 
 function Stat({
@@ -318,11 +318,11 @@ function Stat({
 }) {
   return (
     <div className="rounded-2xl border border-line bg-surface px-5 py-4 shadow-card-sm">
-      <div className="mb-1.5 text-[12.5px] text-text-3">{label}</div>
-      <div className="font-mono text-[22px] leading-[1.2] font-bold tracking-[-0.02em] text-text tabular-nums">
+      <div className="mb-1.5 text-caption text-text-3">{label}</div>
+      <div className="font-mono text-title-sm leading-[1.2] font-bold tracking-[-0.02em] text-text tabular-nums">
         {value}
       </div>
-      <div className="mt-1 text-[12px] text-text-3">{note}</div>
+      <div className="mt-1 text-caption text-text-3">{note}</div>
     </div>
   );
 }
@@ -343,13 +343,13 @@ function Action({
       href={href}
       className="rounded-2xl border border-line bg-surface px-5 py-4 shadow-card-sm hover:border-gray-node-line"
     >
-      <div className="mb-1.5 text-[12.5px] text-text-3">{label}</div>
+      <div className="mb-1.5 text-caption text-text-3">{label}</div>
       <div
-        className={`font-mono text-[22px] leading-[1.2] font-bold tabular-nums ${
+        className={`font-mono text-title-sm leading-[1.2] font-bold tabular-nums ${
           warn ? "text-warn" : "text-text"
         }`}
       >
-        {value}
+        {value}건
       </div>
     </Link>
   );
@@ -364,7 +364,7 @@ const OUTCOME_PARTS = [
 ] as const;
 
 function OutcomeBar({ result }: { result: Outcome }) {
-  if (result.total === 0) return <Empty>최근 처리된 턴이 없습니다</Empty>;
+  if (result.total === 0) return <Empty>최근 처리된 질의가 없습니다</Empty>;
 
   return (
     <div>
@@ -388,11 +388,11 @@ function OutcomeBar({ result }: { result: Outcome }) {
           return (
             <span
               key={p.key}
-              className="flex items-center gap-1.5 text-[12.5px] text-text-2"
+              className="flex items-center gap-1.5 text-caption text-text-2"
             >
               <span className={`size-2 rounded-full ${p.className}`} />
               {p.label}
-              <span className="font-mono font-semibold tabular-nums">{n}</span>
+              <span className="font-mono font-semibold tabular-nums">{n}건</span>
             </span>
           );
         })}
@@ -412,7 +412,7 @@ function Bar({
 }) {
   return (
     <div>
-      <div className="mb-1 flex items-baseline justify-between text-[12.5px]">
+      <div className="mb-1 flex items-baseline justify-between text-caption">
         <span className="text-text-2">{label}</span>
         <span className="font-mono text-text-3 tabular-nums">{value}건</span>
       </div>
@@ -448,30 +448,30 @@ function EngineStatus({ health }: { health: EngineHealth }) {
               : "bg-danger"
         }`}
       />
-      <span className="text-[14px] font-semibold text-text">엔진</span>
+      <span className="text-body-sm font-semibold text-text">엔진</span>
 
       {health.state === "ok" && (
         <>
-          <span className="text-[13.5px] text-text-2">정상</span>
-          <span className="ml-auto flex items-center gap-4 font-mono text-[13px] text-text-2 tabular-nums">
+          <span className="text-body-sm text-text-2">정상</span>
+          <span className="ml-auto flex items-center gap-4 font-mono text-label text-text-2 tabular-nums">
             <span>
-              처리 중 <span className="font-bold text-text">{health.running}</span>
+              처리 중 <span className="font-bold text-text">{health.running}건</span>
             </span>
             <span>
-              대기 <span className="font-bold text-text">{health.queued}</span>
+              대기 <span className="font-bold text-text">{health.queued}건</span>
             </span>
           </span>
         </>
       )}
 
       {health.state === "mock" && (
-        <span className="text-[13.5px] text-text-3">
+        <span className="text-body-sm text-text-3">
           목업으로 동작 중 — ENGINE_URL이 설정되지 않았습니다
         </span>
       )}
 
       {health.state === "down" && (
-        <span className="text-[13.5px] text-danger">
+        <span className="text-body-sm text-danger">
           응답 없음 · {health.reason}
         </span>
       )}

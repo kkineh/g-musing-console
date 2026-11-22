@@ -59,10 +59,10 @@ export default async function HistoryPage({
   return (
     <div>
       <div className="mb-6">
-        <h1 className="mb-1.5 text-[27px] leading-[1.25] font-bold tracking-[-0.03em]">
+        <h1 className="mb-1.5 text-title leading-[1.25] font-bold tracking-[-0.03em]">
           처리 이력
         </h1>
-        <p className="text-[14.5px] text-text-3">
+        <p className="text-body text-text-3">
           지금까지 실행한 질의와 채점 결과입니다.
         </p>
       </div>

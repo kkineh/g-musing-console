@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   Area,
   AreaChart,
@@ -28,7 +29,7 @@ function Frame({ children }: { children: React.ReactNode }) {
 
 function TipBox({ children }: { children: React.ReactNode }) {
   return (
-    <div className="rounded-lg border border-line bg-surface px-3 py-2 text-[12px] shadow-card-lg">
+    <div className="rounded-lg border border-line bg-surface px-3 py-2 text-caption shadow-card-lg">
       {children}
     </div>
   );
@@ -100,8 +101,8 @@ export function DurationChart({
   if (!hasData) {
     return (
       <Frame>
-        <div className="grid h-full place-items-center text-[13px] text-text-3">
-          완료된 턴이 없습니다
+        <div className="grid h-full place-items-center text-label text-text-3">
+          완료된 질의가 없습니다
         </div>
       </Frame>
     );
@@ -154,8 +155,11 @@ export function ScoreTrendChart({
   if (trend.every((t) => t.count === 0)) {
     return (
       <Frame>
-        <div className="grid h-full place-items-center text-[13px] text-text-3">
+        <div className="flex h-full flex-col items-center justify-center gap-1.5 text-label text-text-3">
           채점 이력이 없습니다
+          <Link href="/score" className="text-caption font-medium text-accent-deep hover:underline">
+            채점 대기로 이동
+          </Link>
         </div>
       </Frame>
     );

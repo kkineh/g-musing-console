@@ -32,14 +32,14 @@ export function ScorePanel({
         >
           <path d="M4.5 2.5L8 6l-3.5 3.5" />
         </svg>
-        <span className="text-[13px] font-semibold text-text-2">채점</span>
+        <span className="text-label font-semibold text-text-2">채점</span>
         <span className="ml-auto">
           {score ? (
-            <span className="rounded-md bg-accent-soft px-2.5 py-0.5 font-mono text-[13px] font-bold tabular-nums text-accent-deep">
-              {score.average.toFixed(1)}
+            <span className="rounded-md bg-accent-soft px-2.5 py-0.5 font-mono text-caption font-bold tabular-nums text-accent-deep">
+              {score.average.toFixed(1)}점
             </span>
           ) : (
-            <span className="text-[12.5px] text-text-3">미채점</span>
+            <span className="text-caption text-text-3">미채점</span>
           )}
         </span>
       </button>
@@ -47,7 +47,7 @@ export function ScorePanel({
       {open && (
         <div className="mt-4">
           {score && (
-            <p className="mb-3 text-[12.5px] text-text-3">
+            <p className="mb-3 text-caption text-text-3">
               {score.scoredBy}이 매김. 다시 저장하면 덮어씁니다.
             </p>
           )}

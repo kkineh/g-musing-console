@@ -34,7 +34,7 @@ export default async function LoginPage({
             priority
             className="logo-dark shrink-0"
           />
-          <span className="text-[19px] font-bold tracking-[-0.02em]">
+          <span className="text-heading font-bold tracking-[-0.02em]">
             musing
           </span>
         </div>

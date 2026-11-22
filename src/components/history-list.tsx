@@ -54,7 +54,7 @@ export function HistoryList({
 
   if (rows.length === 0) {
     return (
-      <p className="mt-6 text-[14.5px] text-text-3">
+      <p className="mt-6 text-body text-text-3">
         {query
           ? `"${query}"에 해당하는 질의가 없습니다.`
           : "조건에 맞는 질의가 없습니다."}
@@ -69,7 +69,7 @@ export function HistoryList({
       ))}
 
       {cursor !== null && (
-        <div ref={sentinel} className="py-4 text-center text-[13px] text-text-3">
+        <div ref={sentinel} className="py-4 text-center text-label text-text-3">
           {loading ? "불러오는 중…" : ""}
         </div>
       )}

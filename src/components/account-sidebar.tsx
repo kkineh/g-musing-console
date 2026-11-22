@@ -28,7 +28,7 @@ export function AccountSidebar() {
             <path d="M10 3L5 8l5 5" />
           </svg>
         </button>
-        <span className="text-[13.5px] font-semibold text-text-2">
+        <span className="text-body-sm font-semibold text-text-2">
           마이페이지
         </span>
       </div>
@@ -43,8 +43,8 @@ export function AccountSidebar() {
               aria-current={active ? "page" : undefined}
               className={
                 active
-                  ? "mb-[1px] flex items-center rounded-lg bg-accent-soft px-2.5 py-[7px] text-[13.5px] font-semibold text-accent-deep"
-                  : "mb-[1px] flex items-center rounded-lg px-2.5 py-[7px] text-[13.5px] font-medium text-text-2 hover:bg-surface-3 hover:text-text"
+                  ? "mb-[1px] flex items-center rounded-lg bg-accent-soft px-2.5 py-[7px] text-body-sm font-semibold text-accent-deep"
+                  : "mb-[1px] flex items-center rounded-lg px-2.5 py-[7px] text-body-sm font-medium text-text-2 hover:bg-surface-3 hover:text-text"
               }
             >
               {item.label}

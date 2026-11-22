@@ -34,13 +34,13 @@ export function HistoryRowCard({
   return (
     <div className="rounded-2xl border border-line bg-surface px-5 py-4 shadow-card-sm">
       <div className="mb-2 flex flex-wrap items-center gap-2.5">
-        <span className="font-mono text-[13px] text-text-3">
+        <span className="font-mono text-label text-text-3">
           {chatNo(row.id)}
         </span>
         <Tag>{chatTypeLabel(row.type)}</Tag>
         <Tag>{row.companyName ?? "공통"}</Tag>
         {row.askedBack && <Tag accent>되묻기</Tag>}
-        {row.turnCount > 1 && <Tag>{row.turnCount}턴</Tag>}
+        {row.turnCount > 1 && <Tag>질의 {row.turnCount}건</Tag>}
         {row.status !== "DONE" && (
           <Tag
             warn={row.status === "WAITING_INPUT"}
@@ -53,7 +53,7 @@ export function HistoryRowCard({
           {row.average !== null ? (
             <Score value={row.average} />
           ) : (
-            <span className="text-[12.5px] text-text-3">미채점</span>
+            <span className="text-caption text-text-3">미채점</span>
           )}
         </span>
       </div>
@@ -61,7 +61,7 @@ export function HistoryRowCard({
       <div className="mb-2 flex items-start gap-3">
         <Link
           href={`/c/${row.publicId}`}
-          className="line-clamp-1 flex-1 text-[15px] leading-[1.55] text-text hover:text-accent"
+          className="line-clamp-1 flex-1 text-lead leading-[1.55] text-text hover:text-accent"
         >
           <Highlight text={row.title} needle={highlight} />
         </Link>
@@ -84,29 +84,29 @@ export function HistoryRowCard({
         </button>
       </div>
 
-      <div className="flex flex-wrap gap-4 text-[13px] text-text-3">
+      <div className="flex flex-wrap gap-4 text-caption text-text-3">
         <span>{row.memberName}</span>
         {row.elapsedMs !== null && (
-          <span className="font-mono text-[12.5px]">{formatDuration(row.elapsedMs)}</span>
+          <span className="font-mono text-caption">{formatDuration(row.elapsedMs)}</span>
         )}
-        <span className="font-mono text-[12.5px]">{formatDateTime(row.createdAt)}</span>
+        <span className="font-mono text-caption">{formatDateTime(row.createdAt)}</span>
       </div>
 
       {open && (
         <div className="mt-3.5 border-t border-line-soft pt-3.5">
           {row.answer ? (
-            <p className="line-clamp-3 text-sm leading-[1.7] text-text-2">
+            <p className="line-clamp-3 text-body-sm leading-[1.7] text-text-2">
               <Highlight text={excerpt(row.answer, highlight)} needle={highlight} />
             </p>
           ) : (
-            <p className="text-sm text-text-3">아직 답변이 없습니다.</p>
+            <p className="text-body-sm text-text-3">아직 답변이 없습니다.</p>
           )}
 
           {stats.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-5.5">
               {stats.map(([label, value]) => (
-                <div key={label} className="text-[13.5px]">
-                  <span className="mb-0.5 block text-[12.5px] text-text-3">
+                <div key={label} className="text-body-sm">
+                  <span className="mb-0.5 block text-caption text-text-3">
                     {label}
                   </span>
                   <span className="font-mono">{value}</span>
@@ -117,7 +117,7 @@ export function HistoryRowCard({
 
           <Link
             href={`/c/${row.publicId}`}
-            className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-line bg-surface-2 px-4 py-2 text-[13.5px] font-medium text-text-2 hover:border-gray-node-line hover:text-text"
+            className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-line bg-surface-2 px-4 py-2 text-body-sm font-medium text-text-2 hover:border-gray-node-line hover:text-text"
           >
             대화 열기
             <svg
@@ -156,7 +156,7 @@ function Tag({
         : "bg-surface-3 text-text-2";
 
   return (
-    <span className={`rounded-md px-2.5 py-0.5 text-[12.5px] ${tone}`}>
+    <span className={`rounded-md px-2.5 py-0.5 text-caption ${tone}`}>
       {children}
     </span>
   );
@@ -172,9 +172,9 @@ function Score({ value }: { value: number }) {
 
   return (
     <span
-      className={`rounded-md px-2.5 py-0.5 font-mono text-sm font-bold tabular-nums ${tone}`}
+      className={`rounded-md px-2.5 py-0.5 font-mono text-caption font-bold tabular-nums ${tone}`}
     >
-      {value.toFixed(1)}
+      {value.toFixed(1)}점
     </span>
   );
 }

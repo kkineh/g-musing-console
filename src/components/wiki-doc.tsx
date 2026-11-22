@@ -26,7 +26,7 @@ export function WikiDocView({
     <div>
       <Link
         href={categoryHref}
-        className="mb-3 inline-flex items-center gap-1.5 rounded-lg px-1.5 py-1.5 text-[13px] font-medium text-text-3 hover:bg-surface-2 hover:text-text"
+        className="mb-3 inline-flex items-center gap-1.5 rounded-lg px-1.5 py-1.5 text-label font-medium text-text-3 hover:bg-surface-2 hover:text-text"
       >
         <svg
           viewBox="0 0 14 14"
@@ -42,38 +42,38 @@ export function WikiDocView({
 
       <article className="rounded-2xl border border-line bg-surface px-9 pt-8 pb-10 shadow-card-sm">
         <div className="mb-6">
-          <div className="mb-2 text-[13.5px] text-text-3">
+          <div className="mb-2 text-body-sm text-text-3">
             {category} / {title}
           </div>
-          <h2 className="mb-3.5 text-[29px] leading-[1.25] font-bold tracking-[-0.03em]">
+          <h2 className="mb-3.5 text-display leading-[1.25] font-bold tracking-[-0.03em]">
             {title}
           </h2>
-          <div className="flex items-center gap-2 text-[12.5px] text-text-3">
+          <div className="flex items-center gap-2 text-caption text-text-3">
             <span>{author}</span>
             <span aria-hidden>·</span>
             <span className="font-mono">{formatDate(createdAt)}</span>
           </div>
         </div>
 
-        <div className="text-[15.5px] leading-[1.9] text-text-2">
+        <div className="text-lead leading-[1.9] text-text-2">
           <Markdown
             remarkPlugins={[remarkGfm]}
             components={{
               h1: (props) => (
                 <h3
-                  className="mt-7 mb-3 text-[18px] font-semibold tracking-[-0.015em] text-text first:mt-0"
+                  className="mt-7 mb-3 text-heading font-semibold tracking-[-0.015em] text-text first:mt-0"
                   {...props}
                 />
               ),
               h2: (props) => (
                 <h3
-                  className="mt-7 mb-3 text-[18px] font-semibold tracking-[-0.015em] text-text first:mt-0"
+                  className="mt-7 mb-3 text-heading font-semibold tracking-[-0.015em] text-text first:mt-0"
                   {...props}
                 />
               ),
               h3: (props) => (
                 <h4
-                  className="mt-6 mb-2.5 text-[16px] font-semibold text-text first:mt-0"
+                  className="mt-6 mb-2.5 text-lead font-semibold text-text first:mt-0"
                   {...props}
                 />
               ),
@@ -96,30 +96,30 @@ export function WikiDocView({
               ),
               code: (props) => (
                 <code
-                  className="rounded-[5px] border border-line bg-bg px-1.5 py-0.5 font-mono text-[13.5px] text-text"
+                  className="rounded-[5px] border border-line bg-bg px-1.5 py-0.5 font-mono text-body-sm text-text"
                   {...props}
                 />
               ),
               pre: (props) => (
                 <pre
-                  className="mb-4 overflow-x-auto rounded-xl border border-line bg-bg p-4 font-mono text-[13px] leading-[1.7] text-text"
+                  className="mb-4 overflow-x-auto rounded-xl border border-line bg-bg p-4 font-mono text-label leading-[1.7] text-text"
                   {...props}
                 />
               ),
               blockquote: (props) => (
                 <blockquote
-                  className="mb-4 rounded-xl bg-accent-soft px-5 py-4 text-[14.5px] leading-[1.75]"
+                  className="mb-4 rounded-xl bg-accent-soft px-5 py-4 text-body leading-[1.75]"
                   {...props}
                 />
               ),
               table: (props) => (
                 <div className="mb-5 overflow-x-auto">
-                  <table className="w-full border-separate border-spacing-0 text-sm" {...props} />
+                  <table className="w-full border-separate border-spacing-0 text-body-sm" {...props} />
                 </div>
               ),
               th: (props) => (
                 <th
-                  className="bg-surface-2 px-3.5 py-2.5 text-left text-[13px] font-semibold text-text-2 first:rounded-tl-lg last:rounded-tr-lg"
+                  className="bg-surface-2 px-3.5 py-2.5 text-left text-label font-semibold text-text-2 first:rounded-tl-lg last:rounded-tr-lg"
                   {...props}
                 />
               ),

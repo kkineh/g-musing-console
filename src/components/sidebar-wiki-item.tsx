@@ -75,8 +75,8 @@ export function SidebarWikiItem() {
       <div
         className={
           pathname === "/wiki"
-            ? "mb-[1px] flex items-center rounded-lg bg-accent-soft pr-2.5 text-[13.5px] font-semibold text-accent-deep"
-            : "mb-[1px] flex items-center rounded-lg pr-2.5 text-[13.5px] font-medium text-text-2 hover:bg-surface-3 hover:text-text"
+            ? "mb-[1px] flex items-center rounded-lg bg-accent-soft pr-2.5 text-body-sm font-semibold text-accent-deep"
+            : "mb-[1px] flex items-center rounded-lg pr-2.5 text-body-sm font-medium text-text-2 hover:bg-surface-3 hover:text-text"
         }
       >
         <button
@@ -123,7 +123,7 @@ export function SidebarWikiItem() {
       {open && (
         <div className="mt-0.5 mb-1 flex flex-col gap-0.5 border-l border-line-soft pl-2.5">
           {!tree ? (
-            <div className="px-2.5 py-1.5 text-[12px] text-text-3">
+            <div className="px-2.5 py-1.5 text-caption text-text-3">
               불러오는 중…
             </div>
           ) : (
@@ -179,8 +179,8 @@ function CategoryLink({
       <div
         className={
           isExact
-            ? "flex items-center rounded-md bg-accent-soft pr-2.5 text-[12.5px] font-semibold text-accent-deep"
-            : "flex items-center rounded-md pr-2.5 text-[12.5px] text-text-2 hover:bg-surface-3 hover:text-text"
+            ? "flex items-center rounded-md bg-accent-soft pr-2.5 text-caption font-semibold text-accent-deep"
+            : "flex items-center rounded-md pr-2.5 text-caption text-text-2 hover:bg-surface-3 hover:text-text"
         }
         style={{ paddingLeft: `${10 + depth * 12}px` }}
       >
@@ -212,7 +212,7 @@ function CategoryLink({
           className="flex min-w-0 flex-1 items-center justify-between py-[5px]"
         >
           <span className="truncate">{node.name}</span>
-          <span className="ml-2 font-mono text-[11px] text-text-3">
+          <span className="ml-2 font-mono text-tiny text-text-3">
             {node.docCount}
           </span>
         </Link>

@@ -46,7 +46,7 @@ export function LiveTurn({
           {steps.map((step, i) => (
             <div
               key={`${step.label}-${i}`}
-              className="flex items-center gap-2.5 text-[13.5px] text-text-2"
+              className="flex items-center gap-2.5 text-body-sm text-text-2"
             >
               <svg
                 viewBox="0 0 14 14"
@@ -61,7 +61,7 @@ export function LiveTurn({
                 {step.label}
                 {step.detail ? ` — ${step.detail}` : ""}
               </span>
-              <span className="ml-auto font-mono text-[12.5px] text-text-3">
+              <span className="ml-auto font-mono text-caption text-text-3">
                 {formatDuration(step.elapsedMs)}
               </span>
             </div>
@@ -70,12 +70,12 @@ export function LiveTurn({
       )}
 
       {answer ? (
-        <div className="text-[15.5px] leading-[1.85] whitespace-pre-wrap text-text-2">
+        <div className="text-lead leading-[1.85] whitespace-pre-wrap text-text-2">
           {answer}
           <span className="ml-0.5 inline-block h-4 w-[2px] translate-y-0.5 animate-pulse bg-accent" />
         </div>
       ) : (
-        <p className="flex items-center gap-2 text-[15px] text-text-3">
+        <p className="flex items-center gap-2 text-lead text-text-3">
           <span className="inline-block size-1.5 animate-pulse rounded-full bg-accent" />
           엔진이 처리하고 있습니다…
         </p>
@@ -86,7 +86,7 @@ export function LiveTurn({
         <input type="hidden" name="chatId" value={chatId} />
         <button
           type="submit"
-          className="rounded-lg bg-surface-3 px-3.5 py-1.5 text-[13px] font-medium text-text-2 hover:bg-line hover:text-text"
+          className="rounded-lg bg-surface-3 px-3.5 py-1.5 text-label font-medium text-text-2 hover:bg-line hover:text-text"
         >
           취소
         </button>
